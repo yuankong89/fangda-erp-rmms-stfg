@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.UserDao">
+    <select id="listUserShiftByUserId" resultMap="UserShiftMap">
+        SELECT
+            T.OP_ID,
+            T.CLASS_TYPE,
+            T.ROLE_TYPE
+            FROM TB_PERM_OP_CLASS T
+        WHERE T.FLAG = 1 AND T.OP_ID = #{userId}
+    </select>
+
+    <select id="listUserRolesByUserId" resultMap="UserRoleMap">
+        SELECT
+            T.OP_ID,
+            T.ROLE_ID,
+            T2.ROLE_NAME
+            FROM TB_PERM_OPERATOR_ROLE T
+            LEFT JOIN TB_PERM_ROLE T2 ON T.ROLE_ID = T2.ROLE_ID AND T2.FLAG = 1
+        WHERE T.FLAG = 1
+        AND T.OP_ID = #{opId}
+    </select>
+
+    <resultMap id="UserShiftMap" type="com.fangda.erp.rmms.stfg.db.dataobject.UserShiftDO">
+        <id column="OP_ID" property="userId"/>
+        <result column="ROLE_TYPE" property="role"/>
+        <result column="CLASS_TYPE" property="shift"/>
+    </resultMap>
+
+    <resultMap id="UserRoleMap" type="com.fangda.erp.rmms.stfg.db.dataobject.UserRoleDO">
+        <id column="OP_ID" property="userId"/>
+        <result column="ROLE_ID" property="roleId"/>
+        <result column="ROLE_NAME" property="roleName"/>
+    </resultMap>
+</mapper>

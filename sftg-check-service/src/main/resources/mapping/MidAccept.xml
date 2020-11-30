@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.MidAcceptDao">
+    <insert id="insertMidAcceptData" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptDataDO">
+        INSERT INTO TB_LOGISTICS_INPUT_CHECK_MID(
+        RAW_MACHINE_ID,
+        UNLOAD_POS,
+        REMARK,
+        CHECK_TIME,
+        OPERATOR,
+        CHECK_STATE
+        ) VALUES (
+        #{rawMachineId},
+        #{acceptPos},
+        #{remark},
+        #{checkTime},
+        #{operator},
+        0
+        )
+    </insert>
+
+    <insert id="insertAcceptDataDetail" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptDetailDO">
+        INSERT INTO TB_LOGISTICS_INPUT_CHECK_DE_MI(
+        RAW_MACHINE_ID,
+        DATA_NO,
+        DATA_NAME,
+        AMOUNT
+        ) VALUES (
+        #{rawMachineId},
+        #{dataNo},
+        #{dataName},
+        #{dataValue}
+        )
+    </insert>
+
+    <select id="selectMidAcceptData" resultMap="com.fangda.erp.rmms.stfg.db.dao.AcceptDao.AcceptDataMap">
+        SELECT  IC.RAW_MACHINE_ID,
+        IC.UNLOAD_POS,
+        IC.REMARK,
+        IC.CHECK_TIME,
+        IC.OPERATOR
+        FROM TB_LOGISTICS_INPUT_CHECK_MID IC
+        WHERE IC.RAW_MACHINE_ID = #{rawMachineId}
+    </select>
+
+    <select id="listMidAcceptDataDetails" resultMap="com.fangda.erp.rmms.stfg.db.dao.AcceptDao.AcceptDataDetailMap">
+        SELECT
+        ICD.RAW_MACHINE_ID,
+        ICD.DATA_NO,
+        ICD.DATA_NAME,
+        ICD.AMOUNT
+        FROM TB_LOGISTICS_INPUT_CHECK_DE_MI ICD
+        WHERE ICD.RAW_MACHINE_ID = #{rawMachineId}
+        ORDER BY ICD.DATA_NO
+    </select>
+</mapper>

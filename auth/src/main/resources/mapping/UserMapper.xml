@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.auth.db.dao.UserDao" >
+
+    <resultMap type="com.fangda.erp.auth.db.dataobject.UserDO" id="UserResult">
+        <id column="ACCOUNT" property="account" jdbcType="NVARCHAR" />
+        <result column="OP_ID" property="opId" jdbcType="NVARCHAR" />
+        <result column="OP_NAME" property="username" jdbcType="NVARCHAR" />
+        <result column="OP_PWD" property="password" jdbcType="NVARCHAR" />
+        <result column="DP_ID" property="dpId" jdbcType="NVARCHAR" />
+        <result column="TELEPHONE" property="telephone" jdbcType="NVARCHAR" />
+    </resultMap>
+
+    <select id="selectByAccount" resultMap="UserResult">
+        SELECT
+            T.OP_ID,
+            T.OP_NAME,
+            T.ACCOUNT,
+            T.OP_PWD,
+            T.DP_ID,
+            T.TELEPHONE
+        FROM TB_PERM_OPERATOR T
+        WHERE T.FLAG = 1
+          AND T.ACCOUNT = #{account}
+    </select>
+
+</mapper>

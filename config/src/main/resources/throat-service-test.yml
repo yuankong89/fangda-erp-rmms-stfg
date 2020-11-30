@@ -1,0 +1,29 @@
+server:
+  port: 52810
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:52700/eureka/
+
+logging:
+  level:
+    root: info
+    com.fangda.erp.tms.impl: DEBUG
+    com.fangda.erp.tms.dispatch.impl: DEBUG
+
+#ribbon的超时时间, 防止feign调用超时
+ribbon:
+  ReadTimeout: 5000
+  ConnectTimeout: 5000
+  MaxAutoRetries: 2 #同一台实例最大重试次数,不包括首次调用
+  MaxAutoRetriesNextServer: 2 #重试负载均衡其他的实例最大重试次数,不包括首次调用
+  OkToRetryOnAllOperations: false  #是否所有操作都重试
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.MachineDao">
+    <select id="listUnloadingMachinesByTypeAndLevel" resultMap="UnloadingMachineMap">
+        SELECT
+        M.RAW_MACHINE_ID,
+        FLOW.FLOW_NO,
+        M.LISCENCE_NUM,
+        M.RAW_CODE,
+        M.LEVEL_CODE,
+        M.LEVEL_NAME || M.RAW_NAME AS RAW_NAME,
+        M.RAW_CODE,
+        WN.GROSS_WEIGHT,
+        WN.GROSS_WEIGHT_TIME,
+        PRE.REMARK AS PRE_RAW_LEVEL,
+        UNLOAD.DAY_SORT
+        FROM VI_ENTER_RAW_INFO M
+        LEFT JOIN TB_LOGISTICS_WEIGHT_NOTE WN ON M.RAW_MACHINE_ID = WN.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK_UNLD UNLD ON M.RAW_MACHINE_ID = UNLD.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_MACHINE_PLAN_REM PRE ON M.RAW_MACHINE_ID = PRE.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON M.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
+        LEFT JOIN TB_UN_RECORD UNLOAD ON M.RAW_MACHINE_ID = UNLOAD.RAW_MACHINE_ID
+        WHERE UNLD.RAW_MACHINE_ID IS NULL
+        AND WN.GROSS_WEIGHT IS NOT NULL
+        AND M.STATE BETWEEN 1 AND 69
+        AND M.RAW_CODE IN
+        <foreach item="typeCode" index="index" collection="typeCodeList" open="(" separator="," close=")">
+            #{typeCode}
+        </foreach>
+        AND (M.LEVEL_CODE IS NULL OR M.LEVEL_CODE IN
+        <foreach item="levelCode" index="index" collection="levelCodeList" open="(" separator="," close=")">
+            #{levelCode}
+        </foreach>
+        )
+        ORDER BY WN.GROSS_WEIGHT_TIME ASC, UNLOAD.DAY_SORT ASC
+    </select>
+
+    <select id="listUnloadedMachineByUserId" resultMap="UnloadedMachineMap">
+        SELECT
+        M.RAW_MACHINE_ID,
+        FLOW.FLOW_NO,
+        M.LISCENCE_NUM,
+        M.RAW_CODE,
+        M.LEVEL_CODE,
+        M.LEVEL_NAME || M.RAW_NAME AS RAW_NAME,
+        WN.GROSS_WEIGHT,
+        WN.GROSS_WEIGHT_TIME,
+        CASE WHEN SC.IS_CHECKED=1 THEN 1 ELSE 0 END AS SELF_CHECKED,
+        UNLD.CHECK_TIME
+        FROM VI_ENTER_RAW_INFO M
+        LEFT JOIN TB_LOGISTICS_WEIGHT_NOTE WN ON M.RAW_MACHINE_ID = WN.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK_UNLD UNLD ON M.RAW_MACHINE_ID = UNLD.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUTCHECK_UNPCH SC ON M.RAW_MACHINE_ID = SC.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON M.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK CK ON M.RAW_MACHINE_ID = CK.RAW_MACHINE_ID
+        WHERE (CK.CHECK_STATE != 0 OR CK.CHECK_STATE IS NULL)
+        AND UNLD.OPERATOR = #{userId}
+        ORDER BY WN.GROSS_WEIGHT_TIME DESC
+    </select>
+
+    <select id="listAcceptableMachinesByAndLevel" resultMap="AcceptableMachineMap">
+        SELECT M.RAW_MACHINE_ID,
+        FLOW.FLOW_NO,
+        M.LISCENCE_NUM,
+        M.RAW_CODE,
+        M.LEVEL_CODE,
+        M.LEVEL_NAME || M.RAW_NAME AS RAW_NAME,
+        WN.GROSS_WEIGHT,
+        WN.GROSS_WEIGHT_TIME,
+        PRE.REMARK AS PRE_RAW_LEVEL,
+        UNLD.REMARK AS UNLOAD_REMARK,
+        UNLOAD.DAY_SORT
+        FROM VI_ENTER_RAW_INFO M
+        LEFT JOIN TB_LOGISTICS_WEIGHT_NOTE WN ON M.RAW_MACHINE_ID = WN.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK A ON M.RAW_MACHINE_ID = A.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_MACHINE_PLAN_REM PRE ON M.RAW_MACHINE_ID = PRE.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON M.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK_UNLD UNLD ON M.RAW_MACHINE_ID = UNLD.RAW_MACHINE_ID
+        LEFT JOIN TB_UN_RECORD UNLOAD ON M.RAW_MACHINE_ID = UNLOAD.RAW_MACHINE_ID
+        WHERE A.RAW_MACHINE_ID IS NULL
+        AND WN.GROSS_WEIGHT IS NOT NULL
+        AND M.STATE BETWEEN 1 AND 69
+        AND M.RAW_CODE IN
+        <foreach item="typeCode" index="index" collection="typeCodeList" open="(" separator="," close=")">
+            #{typeCode}
+        </foreach>
+        AND (M.LEVEL_CODE IS NULL OR M.LEVEL_CODE IN
+        <foreach item="levelCode" index="index" collection="levelCodeList" open="(" separator="," close=")">
+            #{levelCode}
+        </foreach>
+        )
+        ORDER BY WN.GROSS_WEIGHT_TIME ASC, UNLOAD.DAY_SORT ASC
+    </select>
+
+    <select id="listAcceptedMachinesByUserId" resultMap="AcceptedMachineMap">
+        SELECT
+        M.RAW_MACHINE_ID,
+        FLOW.FLOW_NO,
+        M.LISCENCE_NUM,
+        M.RAW_CODE,
+        M.LEVEL_CODE,
+        M.LEVEL_NAME || M.RAW_NAME AS RAW_NAME,
+        WN.GROSS_WEIGHT,
+        WN.GROSS_WEIGHT_TIME,
+        CASE WHEN SC.IS_CHECKED=1 THEN 1 ELSE 0 END AS IS_CHECKED,
+        ACCEPT.CHECK_TIME,
+        UNLD.REMARK AS UNLOAD_REMARK
+        FROM VI_ENTER_RAW_INFO M
+        LEFT JOIN TB_LOGISTICS_WEIGHT_NOTE WN ON M.RAW_MACHINE_ID = WN.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK ACCEPT ON M.RAW_MACHINE_ID = ACCEPT.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUTCHECK_PERCHE SC ON M.RAW_MACHINE_ID = SC.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON M.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK_UNLD UNLD ON M.RAW_MACHINE_ID = UNLD.RAW_MACHINE_ID
+        WHERE ACCEPT.CHECK_STATE != 0
+        AND ACCEPT.OPERATOR = #{userId}
+        ORDER BY WN.GROSS_WEIGHT_TIME DESC
+    </select>
+
+    <select id="listAllAcceptedMachines" resultMap="AcceptedMachineMap">
+        SELECT
+        M.RAW_MACHINE_ID,
+        FLOW.FLOW_NO,
+        M.LISCENCE_NUM,
+        M.RAW_CODE,
+        M.LEVEL_CODE,
+        M.LEVEL_NAME || M.RAW_NAME AS RAW_NAME,
+        WN.GROSS_WEIGHT,
+        WN.GROSS_WEIGHT_TIME,
+        CASE WHEN SC.IS_CHECKED=1 THEN 1 ELSE 0 END AS IS_CHECKED,
+        ACCEPT.CHECK_TIME
+        FROM VI_ENTER_RAW_INFO M
+        LEFT JOIN TB_LOGISTICS_WEIGHT_NOTE WN ON M.RAW_MACHINE_ID = WN.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK ACCEPT ON M.RAW_MACHINE_ID = ACCEPT.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUTCHECK_PERCHE SC ON M.RAW_MACHINE_ID = SC.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON M.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK_UNLD UNLD ON M.RAW_MACHINE_ID = UNLD.RAW_MACHINE_ID
+        WHERE ACCEPT.RAW_MACHINE_ID IS NOT NULL
+        AND M.RAW_CODE IN
+        <foreach item="type" index="index" collection="typeCodeList" open="(" separator="," close=")">
+            #{type}
+        </foreach>
+        AND (UNLD.RAW_MACHINE_ID IS NOT NULL OR M.RAW_CODE NOT IN
+        ('1002000073','1002000122','1002000123','1002000124','1002000158','1002000161') OR M.LEVEL_NAME IN ('优质'))
+        AND ACCEPT.CHECK_STATE != 0
+        ORDER BY WN.GROSS_WEIGHT_TIME DESC
+    </select>
+
+    <select id="listMidAcceptedMachines" resultMap="AcceptedMachineMap">
+        SELECT
+        M.RAW_MACHINE_ID,
+        M.LISCENCE_NUM,
+        FLOW.FLOW_NO,
+        M.RAW_CODE,
+        M.LEVEL_CODE,
+        M.LEVEL_NAME || M.RAW_NAME AS RAW_NAME,
+        MC.CREATE_TIME,
+        MC.CHECK_TIME
+        FROM VI_ENTER_RAW_INFO M
+        LEFT JOIN TB_LOGISTICS_WEIGHT_NOTE WN ON M.RAW_MACHINE_ID = WN.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_INPUT_CHECK_MID MC ON M.RAW_MACHINE_ID = MC.RAW_MACHINE_ID
+        LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON M.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
+        WHERE MC.RAW_MACHINE_ID IS NOT NULL
+        AND M.RAW_CODE IN
+        <foreach item="type" index="index" collection="typeCodeList" open="(" separator="," close=")">
+            #{type}
+        </foreach>
+        AND MC.CREATE_TIME BETWEEN #{startTime} AND #{endTime}
+        ORDER BY WN.GROSS_WEIGHT_TIME DESC
+    </select>
+
+    <select id="selectMaxFlowNo" resultType="String">
+        SELECT MAX(T.FLOW_NO)
+        FROM TB_LOGISTICS_STFG_FLOW_NO T
+        WHERE T.FLOW_NO LIKE CONCAT(#{prefix}, '%')
+    </select>
+
+    <insert id="insertMachineFlowNo">
+        INSERT INTO TB_LOGISTICS_STFG_FLOW_NO(
+        RAW_MACHINE_ID,
+        FLOW_NO
+        ) VALUES (
+        #{rawMachineId},
+        #{newFlowNo}
+        )
+    </insert>
+
+    <resultMap id="UnloadingMachineMap" type="com.fangda.erp.rmms.stfg.bo.unload.UnloadingMachine">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="FLOW_NO" property="flowNo"/>
+        <result column="LISCENCE_NUM" property="liscenceNo"/>
+        <result column="RAW_CODE" property="rawCode"/>
+        <result column="LEVEL_CODE" property="levelCode"/>
+        <result column="RAW_NAME" property="rawName"/>
+
+        <result column="DAY_SORT" property="daySort"/>
+        <result column="GROSS_WEIGHT" property="grossWeight"/>
+        <result column="GROSS_WEIGHT_TIME" property="grossWeightTime"/>
+
+        <result column="PRE_RAW_LEVEL" property="preRawLevel"/>
+    </resultMap>
+
+    <resultMap id="UnloadedMachineMap" type="com.fangda.erp.rmms.stfg.bo.unload.UnloadedMachine">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="FLOW_NO" property="flowNo"/>
+        <result column="LISCENCE_NUM" property="liscenceNo"/>
+        <result column="RAW_CODE" property="rawCode"/>
+        <result column="LEVEL_CODE" property="levelCode"/>
+        <result column="RAW_NAME" property="rawName"/>
+
+        <result column="GROSS_WEIGHT" property="grossWeight"/>
+        <result column="GROSS_WEIGHT_TIME" property="grossWeightTime"/>
+        <result column="SELF_CHECKED" property="selfChecked"/>
+        <result column="CHECK_TIME" property="unloadTime"/>
+    </resultMap>
+
+    <resultMap id="AcceptableMachineMap" type="com.fangda.erp.rmms.stfg.bo.accept.AcceptableMachine">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="FLOW_NO" property="flowNo"/>
+        <result column="LISCENCE_NUM" property="liscenceNo"/>
+        <result column="RAW_CODE" property="rawCode"/>
+        <result column="LEVEL_CODE" property="levelCode"/>
+        <result column="RAW_NAME" property="rawName"/>
+
+        <result column="DAY_SORT" property="daySort"/>
+        <result column="GROSS_WEIGHT" property="grossWeight"/>
+        <result column="GROSS_WEIGHT_TIME" property="grossWeightTime"/>
+
+        <result column="PRE_RAW_LEVEL" property="preRawLevel"/>
+        <result column="UNLOAD_REMARK" property="unloadRemark"/>
+    </resultMap>
+
+    <resultMap id="AcceptedMachineMap" type="com.fangda.erp.rmms.stfg.bo.accept.AcceptedMachine">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="FLOW_NO" property="flowNo"/>
+        <result column="LISCENCE_NUM" property="liscenceNo"/>
+        <result column="RAW_CODE" property="rawCode"/>
+        <result column="LEVEL_CODE" property="levelCode"/>
+        <result column="RAW_NAME" property="rawName"/>
+
+        <result column="GROSS_WEIGHT" property="grossWeight"/>
+        <result column="CREATE_TIME" property="submitTime"/>
+        <result column="CHECK_TIME" property="unloadTime"/>
+    </resultMap>
+
+    <resultMap id="MidAcceptedMachineMap" type="com.fangda.erp.rmms.stfg.bo.accept.MidAcceptedMachine">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="FLOW_NO" property="flowNo"/>
+        <result column="LISCENCE_NUM" property="liscenceNo"/>
+        <result column="RAW_CODE" property="rawCode"/>
+        <result column="LEVEL_CODE" property="levelCode"/>
+        <result column="RAW_NAME" property="rawName"/>
+
+        <result column="CHECK_TIME" property="checkTime"/>
+        <result column="CREATE_TIME" property="submitTime"/>
+    </resultMap>
+</mapper>

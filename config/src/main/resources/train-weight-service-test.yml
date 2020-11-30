@@ -1,0 +1,49 @@
+server:
+  port: 52760
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:52700/eureka/
+
+logging:
+  config: classpath:log4j2-test.xml
+  level:
+    root: info
+
+weight:
+  jdbc:
+    unique-resource-name: weightDataSource
+    driver-class-name: oracle.jdbc.OracleDriver
+    jdbc-url: jdbc:oracle:thin:@192.168.200.70:1521:testdb
+    username: rmms_user
+    password: rmmsusertest
+    maxPoolSize: 8
+    minPoolSize: 8
+
+spring:
+  cloud:
+    stream:
+      default-binder: kafka  #与consul 使用时需要指定 binder
+      kafka:
+        binder:
+          brokers:
+            - 192.168.18.92:9092
+      bindings:
+        carriage-insert-channel: # 输出通道
+          destination: carriage-insert  # 对应的topic
+          content-type: application/json
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      buffer-memory: 40960
+      batch-size: 4096
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: com.fangda.erp.weight.kafka.message

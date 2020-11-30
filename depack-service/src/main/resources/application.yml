@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: rmms-stfg-depack-service
+
+info:
+  app:
+    artifact-id: fangda-erp-${info.app.name}
+    name: ${spring.application.name}
+  company:
+    name: fangda
+  author: yuhb
+  version: 0.0.1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+server:
+  port: 9201
+
+logging:
+  config: classpath:log4j2-prod.xml
+  level:
+    root: info
+
+rmms:
+  jdbc:
+    unique-resource-name: rmmsDataSource
+    driver-class-name: oracle.jdbc.OracleDriver
+    jdbc-url: jdbc:oracle:thin:@192.168.100.67:1521:DBRMMS
+    username: RMMS_USER
+    password: rmms_user
+    maxPoolSize: 8
+    minPoolSize: 8

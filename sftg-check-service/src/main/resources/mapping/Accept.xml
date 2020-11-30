@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.AcceptDao">
+    <insert id="insertAcceptData" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptDataDO">
+        INSERT INTO TB_LOGISTICS_INPUT_CHECK(
+            RAW_MACHINE_ID,
+            UNLOAD_POS,
+            REMARK,
+            CHECK_TIME,
+            OPERATOR
+        ) VALUES (
+            #{rawMachineId},
+            #{acceptPos},
+            #{remark},
+            #{checkTime},
+            #{operator}
+        )
+    </insert>
+
+    <insert id="insertAcceptDataDetail" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptDetailDO">
+        INSERT INTO TB_LOGISTICS_INPUT_CHECK_DE(
+            RAW_MACHINE_ID,
+            DATA_NO,
+            DATA_NAME,
+            AMOUNT
+        ) VALUES (
+            #{rawMachineId},
+            #{dataNo},
+            #{dataName},
+            #{dataValue}
+        )
+    </insert>
+
+    <insert id="insertCheckPhoto" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptPhotoDO">
+        INSERT INTO TB_LOGISTICS_INPUT_CHECK_PHOTO(
+            RAW_MACHINE_ID,
+            NO,
+            PHOTO,
+            CHECK_TYPE
+        )
+        VALUES(
+            #{rawMachineId},
+            #{no},
+            #{photo},
+            #{type}
+        )
+    </insert>
+
+    <select id="selectAcceptData" resultMap="AcceptDataMap">
+        SELECT  IC.RAW_MACHINE_ID,
+                IC.UNLOAD_POS,
+                IC.REMARK,
+                IC.CHECK_TIME,
+                IC.OPERATOR
+            FROM TB_LOGISTICS_INPUT_CHECK IC
+        WHERE IC.RAW_MACHINE_ID = #{rawMachineId}
+    </select>
+
+    <select id="listAcceptDataDetails" resultMap="AcceptDataDetailMap">
+        SELECT
+            ICD.RAW_MACHINE_ID,
+            ICD.DATA_NO,
+            ICD.DATA_NAME,
+            ICD.AMOUNT
+        FROM TB_LOGISTICS_INPUT_CHECK_DE ICD
+        WHERE ICD.RAW_MACHINE_ID = #{rawMachineId}
+        ORDER BY ICD.DATA_NO
+    </select>
+
+    <update id="updateAcceptData">
+        UPDATE TB_LOGISTICS_INPUT_CHECK T
+            SET T.UNLOAD_POS = #{acceptPos},
+                T.REMARK = #{remark},
+                T.CHECK_TIME = #{checkTime}
+        WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </update>
+
+    <delete id="deleteAcceptPhotos">
+        DELETE FROM TB_LOGISTICS_INPUT_CHECK_PHOTO T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+            AND T.CHECK_TYPE = 1
+    </delete>
+
+    <delete id="deleteAcceptDataDetails">
+        DELETE FROM TB_LOGISTICS_INPUT_CHECK_DE T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </delete>
+
+    <delete id="deleteAcceptData">
+        DELETE FROM TB_LOGISTICS_INPUT_CHECK T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </delete>
+
+    <update id="updateAcceptDataState">
+        UPDATE TB_LOGISTICS_INPUT_CHECK
+            SET CHECK_STATE = #{state}
+            WHERE RAW_MACHINE_ID = #{rawMachineId}
+    </update>
+
+    <insert id="insertSelfCheckFlag">
+        INSERT INTO TB_LOGISTICS_INPUTCHECK_PERCHE(
+            RAW_MACHINE_ID,
+            IS_CHECKED
+        )
+        VALUES(
+            #{rawMachineId},
+            1
+        )
+    </insert>
+
+    <select id="countSelfCheckFlag">
+        SELECT COUNT(*)
+            FROM TB_LOGISTICS_INPUTCHECK_PERCHE T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </select>
+
+    <delete id="deleteSelfCheckFlag">
+        DELETE FROM
+            TB_LOGISTICS_INPUTCHECK_PERCHE T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </delete>
+
+    <select id="selectAcceptPhoto" resultMap="AcceptPhotoMap">
+        SELECT
+            T.RAW_MACHINE_ID,
+            T.NO,
+            T.PHOTO
+        FROM TB_LOGISTICS_INPUT_CHECK_PHOTO T
+        WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+          AND T.NO = #{photoNo}
+          AND T.CHECK_TYPE = 1
+    </select>
+
+    <select id="countAcceptPhotoById" resultType="Integer">
+        SELECT COUNT(*) FROM TB_LOGISTICS_INPUT_CHECK_PHOTO T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+              AND T.CHECK_TYPE = 1
+    </select>
+
+    <resultMap id="AcceptDataMap" type="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptDataDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="UNLOAD_POS" property="acceptPos"/>
+        <result column="CHECK_TIME" property="checkTime"/>
+        <result column="REMARK" property="remark"/>
+        <result column="OPERATOR" property="operator"/>
+    </resultMap>
+
+    <resultMap id="AcceptDataDetailMap" type="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptDetailDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <id column="DATA_NO" property="dataNo"/>
+        <result column="DATA_NAME" property="dataName"/>
+        <result column="AMOUNT" property="dataValue"/>
+    </resultMap>
+
+    <resultMap id="AcceptPhotoMap" type="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptPhotoDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="NO" property="no"/>
+        <result column="PHOTO" property="photo"/>
+    </resultMap>
+</mapper>

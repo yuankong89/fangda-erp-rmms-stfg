@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.DePackDao">
+
+    <resultMap id="DePackMachineMap" type="com.fangda.erp.rmms.stfg.db.dataobject.DePackMachineDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="LISCENCE_NUM" property="liscenceNo"/>
+        <result column="FLOW_NO" property="flowNo"/>
+        <result column="STATE" property="state"/>
+        <result column="PERSONAL" property="personal"/>
+        <result column="CREATOR" property="creator"/>
+        <result column="CREATE_TIME" property="createTime"/>
+    </resultMap>
+
+    <resultMap id="DePackDetailMap" type="com.fangda.erp.rmms.stfg.db.dataobject.DePackDetailDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <id column="DATA_NO" property="dataNo"/>
+        <result column="DATA_NAME" property="dataName" />
+        <result column="DATA_AMOUNT" property="dataValue" />
+    </resultMap>
+
+    <select id="listDePackMachineByCriteria" parameterType="com.fangda.erp.rmms.stfg.db.query.DePackMachineQuery" resultMap="DePackMachineMap">
+        SELECT
+                DP.RAW_MACHINE_ID,
+                A.LISCENCE_NUM,
+                FLOW.FLOW_NO,
+                DP.STATE
+            FROM TB_LOGISTICS_STFG_DEPACK_CK DP
+            LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON DP.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
+            LEFT JOIN VI_ENTER_RAW_INFO A ON DP.RAW_MACHINE_ID = A.RAW_MACHINE_ID
+        <where>
+            <if test="stateIn != null &amp;&amp; stateIn.size > 0">
+                AND DP.STATE IN
+                <foreach collection="stateIn" item="item" index="index" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="supplierId != null">
+                AND A.SUPPLIER_CODE = #{supplierId}
+            </if>
+            <if test="startTime != null &amp;&amp; endTime != null">
+                AND DP.END_TIME BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="listDePackDetailById" resultMap="DePackDetailMap">
+        SELECT
+                DPD.RAW_MACHINE_ID,
+                DPD.DATA_NO,
+                DPD.DATA_NAME,
+                DPD.DATA_AMOUNT
+            FROM TB_LOGISTICS_STFG_DEPACK_CK_D DPD
+        WHERE DPD.RAW_MACHINE_ID = #{rawMachineId}
+        ORDER BY DPD.DATA_NO
+    </select>
+
+    <select id="countDePackPhotoById" resultType="Integer">
+        SELECT COUNT(*) FROM TB_LOGISTICS_INPUT_CHECK_PHOTO T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId} AND T.CHECK_TYPE = 3
+    </select>
+
+    <insert id="insertDePackData" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.DePackDataDO">
+        INSERT INTO TB_LOGISTICS_STFG_DEPACK_CK(
+            RAW_MACHINE_ID,
+            STATE,
+            CREATE_TIME,
+            CREATOR
+        ) VALUES (
+            #{rawMachineId},
+            #{state},
+            sysdate,
+            #{creator}
+        )
+    </insert>
+
+    <update id="updateDePackData" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.DePackDataDO">
+        UPDATE TB_LOGISTICS_STFG_DEPACK_CK
+            SET STATE = #{state},
+                <if test="startOperator != null">
+                    START_OPER = #{startOperator},
+                    START_TIME = #{startTime}
+                </if>
+                <if test="checkOperator != null">
+                    CHECK_OPER = #{checkOperator},
+                    END_TIME = #{endTime}
+                </if>
+        WHERE RAW_MACHINE_ID = #{rawMachineId}
+    </update>
+
+    <insert id="insertDePackDataDetail" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.DePackDetailDO">
+        INSERT INTO TB_LOGISTICS_STFG_DEPACK_CK_D(
+            RAW_MACHINE_ID,
+            DATA_NO,
+            DATA_NAME,
+            DATA_AMOUNT
+        ) VALUES (
+            #{rawMachineId},
+            #{dataNo},
+            #{dataName},
+            #{dataValue}
+        )
+    </insert>
+
+    <insert id="insertDePackPhoto" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.DePackPhotoDO">
+        INSERT INTO TB_LOGISTICS_INPUT_CHECK_PHOTO(
+            RAW_MACHINE_ID,
+            NO,
+            PHOTO,
+            CHECK_TYPE
+        ) VALUES (
+            #{rawMachineId},
+            #{no},
+            #{photo},
+            #{type}
+        )
+    </insert>
+</mapper>

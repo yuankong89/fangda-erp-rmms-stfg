@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.UnloadDao">
+    <insert id="insertUnloadData" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.unload.UnloadDataDO">
+        INSERT INTO TB_LOGISTICS_INPUT_CHECK_UNLD(
+            RAW_MACHINE_ID,
+            UNLOAD_POS,
+            REMARK,
+            CHECK_TIME,
+            OPERATOR
+        ) VALUES (
+            #{rawMachineId},
+            #{unloadPos},
+            #{remark},
+            #{checkTime},
+            #{operator}
+        )
+    </insert>
+
+    <insert id="insertUnloadPhoto" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.unload.UnloadPhotoDO">
+        INSERT INTO TB_LOGISTICS_INPUT_CHECK_PHOTO(
+            RAW_MACHINE_ID,
+            NO,
+            PHOTO,
+            CHECK_TYPE
+        )
+        VALUES(
+            #{rawMachineId},
+            #{no},
+            #{photo},
+            #{type}
+        )
+    </insert>
+
+    <select id="selectUnloadData" resultMap="UnloadDataMap">
+        SELECT  IC.RAW_MACHINE_ID,
+                IC.UNLOAD_POS,
+                IC.REMARK,
+                IC.CHECK_TIME,
+                IC.OPERATOR
+            FROM TB_LOGISTICS_INPUT_CHECK_UNLD IC
+        WHERE IC.RAW_MACHINE_ID = #{rawMachineId}
+    </select>
+
+    <update id="updateUnloadData">
+        UPDATE TB_LOGISTICS_INPUT_CHECK_UNLD T
+            SET T.UNLOAD_POS = #{acceptPos},
+                T.REMARK = #{remark},
+                T.CHECK_TIME = #{checkTime}
+        WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </update>
+
+    <delete id="deleteUnloadPhotos">
+        DELETE FROM TB_LOGISTICS_INPUT_CHECK_PHOTO T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+            AND T.CHECK_TYPE = 2
+    </delete>
+
+    <delete id="deleteUnloadData">
+        DELETE FROM TB_LOGISTICS_INPUT_CHECK_UNLD T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </delete>
+
+    <insert id="insertSelfCheckFlag">
+        INSERT INTO TB_LOGISTICS_INPUTCHECK_UNPCH(
+            RAW_MACHINE_ID,
+            IS_CHECKED
+        )
+        VALUES(
+            #{rawMachineId},
+            1
+        )
+    </insert>
+
+    <select id="countSelfCheckFlag">
+        SELECT COUNT(*)
+            FROM TB_LOGISTICS_INPUTCHECK_UNPCH T
+        WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </select>
+
+    <delete id="deleteSelfCheckFlag">
+        DELETE FROM TB_LOGISTICS_INPUTCHECK_UNPCH T
+            WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </delete>
+
+    <select id="selectUnloadPhoto" resultMap="UnloadPhotoMap">
+        SELECT
+            T.RAW_MACHINE_ID,
+            T.NO,
+            T.PHOTO
+        FROM TB_LOGISTICS_INPUT_CHECK_PHOTO T
+        WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+          AND T.NO = #{photoNo}
+          AND T.CHECK_TYPE = 2
+    </select>
+
+    <resultMap id="UnloadDataMap" type="com.fangda.erp.rmms.stfg.db.dataobject.unload.UnloadDataDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="CHECK_POS" property="unloadPos"/>
+        <result column="CHECK_TIME" property="checkTime"/>
+        <result column="REMARK" property="remark"/>
+        <result column="OPERATOR" property="operator"/>
+    </resultMap>
+
+    <resultMap id="UnloadPhotoMap" type="com.fangda.erp.rmms.stfg.db.dataobject.unload.UnloadPhotoDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="NO" property="no"/>
+        <result column="PHOTO" property="photo"/>
+    </resultMap>
+</mapper>

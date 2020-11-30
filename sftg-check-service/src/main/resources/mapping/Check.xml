@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.AcceptDao">
+    <insert id="backUpAcceptData">
+        INSERT INTO TB_LOGISTICS_REJECT_INPUTCHECK(
+            RAW_MACHINE_ID,
+            UNLOAD_POS,
+            DISPATCH_NO,
+            CHECK_TIME,
+            REMARK,
+            CREATE_TIME,
+            CHECK_STATE,
+            OPERATOR,
+            CRANE_OPERATOR
+        )
+        SELECT
+            RAW_MACHINE_ID,
+            UNLOAD_POS,
+            DISPATCH_NO,
+            CHECK_TIME,
+            REMARK,
+            CREATE_TIME,
+            -1,
+            OPERATOR,
+            CRANE_OPERATOR
+        FROM TB_LOGISTICS_INPUT_CHECK T
+        WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </insert>
+
+    <insert id="backUpAcceptDataDetail">
+        INSERT INTO TB_LOGISTICS_RE_INPUTCHECKDE
+            SELECT *FROM TB_LOGISTICS_INPUT_CHECK_DE T
+                WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </insert>
+
+    <insert id="insertAcceptCheckRecord" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.accept.AcceptCheckRecordDO">
+        INSERT INTO TB_LOGISTICS_INPUTCHECK_CHECK(
+            CHECK_ID,
+            ORIG_STATE,
+            CLOSE_STATE,
+            CHECK_OPER,
+            CHECK_COMMENT
+        ) VALUES (
+            #{rawMachineId},
+            #{origState},
+            #{closeState},
+            #{checkOperator},
+            #{comment}
+        )
+    </insert>
+</mapper>

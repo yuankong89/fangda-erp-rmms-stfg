@@ -1,0 +1,60 @@
+eureka-server: http://localhost:52700/
+
+server:
+  port: 81
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${eureka-server}/eureka/
+
+logging:
+  level:
+    root: info
+
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**, /user/**
+          filters:
+            - name: Auth
+              args:
+                whiteList:
+                  - /auth/**
+        - id: trd-service-websocket
+          uri: lb:ws://trd-service
+          predicates:
+            - Path=/trd/websocket/**
+          filters:
+            - StripPrefix=1
+        - id: trd-service
+          uri: lb://trd-service
+          predicates:
+            - Path=/trd/**
+          filters:
+            - Auth
+            - StripPrefix=1
+        - id: rmms-service
+          uri: lb://rmms-service
+          predicates:
+            - Path=/rmms/**
+          filters:
+            - Auth
+            - StripPrefix=1
+        - id: ems-service
+          uri: lb://ems-service
+          predicates:
+            - Path=/ems/**
+          filters:
+            - Auth
+            - StripPrefix=1

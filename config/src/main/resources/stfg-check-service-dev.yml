@@ -1,0 +1,22 @@
+server:
+  port: 8090
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:52700/eureka/
+
+logging:
+  config: classpath:log4j2-dev.xml
+  level:
+    root: info
+
+rmms:
+  jdbc:
+    unique-resource-name: rmmsDataSource
+    driver-class-name: oracle.jdbc.OracleDriver
+    jdbc-url: jdbc:oracle:thin:@192.168.100.67:1521:DBRMMS
+    username: RMMS_USER
+    password: rmms_user
+    maxPoolSize: 8
+    minPoolSize: 8

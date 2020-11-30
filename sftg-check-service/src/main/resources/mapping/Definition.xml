@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.DefinitionDao">
+    <select id="selectByDefType" resultMap="DefinitionMap">
+        SELECT
+            DEF.DEF_TYPE,
+            DEF.DEF_DATA,
+            DEF.DEF_VERSION
+            FROM TB_LOGISTICS_STFG_DEFINITION DEF
+        WHERE DEF.DEF_TYPE = #{defType}
+    </select>
+
+    <insert id="insertDefinition" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.DefinitionDO">
+        INSERT INTO TB_LOGISTICS_STFG_DEFINITION(
+            DEF_TYPE,
+            DEF_DATA,
+            DEF_VERSION
+        ) VALUES (
+            #{defType},
+            #{defData},
+            #{defVersion}
+        )
+    </insert>
+
+    <resultMap id="DefinitionMap" type="com.fangda.erp.rmms.stfg.db.dataobject.DefinitionDO">
+        <id column="DEF_TYPE" property="defType"/>
+        <result column="DEF_DATA" property="defData"/>
+        <result column="DEF_VERSION" property="defVersion"/>
+    </resultMap>
+</mapper>

@@ -1,0 +1,45 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: stfg-check-service
+  cloud:
+    config:
+      uri: http://localhost:52600
+
+info:
+  app:
+    artifact-id: fangda-erp-${info.app.name}
+    name: ${spring.application.name}
+  company:
+    name: fangda
+  author: yuhb
+  version: 0.0.1-dev
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+---
+spring:
+  profiles: dev
+  cloud:
+    config:
+      profile: dev
+
+---
+spring:
+  profiles: prod
+  cloud:
+    config:
+      profile: prod
+---
+spring:
+  profiles: test
+  cloud:
+    config:
+      profile: test
