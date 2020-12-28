@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
-import java.time.LocalDateTime
 
 /**
  * @author yuhb
@@ -25,20 +24,13 @@ class UnloadManager @Autowired constructor(
      * 处理卸车验收数据
      */
     @Throws(PersistObjectException::class)
-    fun newUnloadData(
-        rawMachineId: String,
-        unloadPos: String,
-        unloadDate: LocalDateTime,
-        remark: String,
-        photos: List<File>,
-        operator: String
-    ): Boolean {
+    fun newUnloadData(unloadData: UnloadData, photos: List<File>, operator: String): Boolean {
         // 插入主记录
         val unloadDataDO = UnloadDataDO().apply {
-            this.rawMachineId = rawMachineId
-            this.unloadPos = unloadPos
-            this.checkTime = unloadDate
-            this.remark = remark
+            this.rawMachineId = unloadData.rawMachineId
+            this.unloadPos = unloadData.unloadPos
+            this.checkTime = unloadData.unloadDate
+            this.remark = unloadData.unloadRemark
             this.operator = operator
         }
         assertPersistSuccess(unloadDao.insertUnloadData(unloadDataDO) == 1) {
@@ -74,20 +66,13 @@ class UnloadManager @Autowired constructor(
      * 修改卸车验收数据
      */
     @Throws(PersistObjectException::class)
-    fun modifyUnloadData(
-        rawMachineId: String,
-        unloadPos: String,
-        unloadDate: LocalDateTime,
-        remark: String,
-        photos: List<File>,
-        operator: String
-    ): Boolean {
+    fun modifyUnloadData(unloadData: UnloadData, photos: List<File>, operator: String): Boolean {
         // 修改主记录
         val unloadDataDO = UnloadDataDO().apply {
-            this.rawMachineId = rawMachineId
-            this.unloadPos = unloadPos
-            this.checkTime = unloadDate
-            this.remark = remark
+            this.rawMachineId = unloadData.rawMachineId
+            this.unloadPos = unloadData.unloadPos
+            this.checkTime = unloadData.unloadDate
+            this.remark = unloadData.unloadRemark
             this.operator = operator
         }
         assertPersistSuccess(unloadDao.updateUnloadData(unloadDataDO) == 1) {

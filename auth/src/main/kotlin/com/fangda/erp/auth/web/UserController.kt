@@ -30,6 +30,8 @@ class UserController {
                     UserDto().apply {
                         this.userId = it.userId
                         this.username = it.username
+                        this.depId = it.depId
+                        this.telephone = it.telephone
                     }
                 }
         }

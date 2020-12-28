@@ -27,11 +27,26 @@ class UserService @Autowired constructor(
     fun listUserRoles(principal: FangdaPrincipal): Mono<List<UserRoleDto>> {
         return Mono.just(principal.userId)
             .flatMap { userId ->
-                if (MANAGER_USER_ID.contains(userId)) {
+                if (!MANAGER_USER_ID.contains(userId)) {
                     Mono.fromCallable { userManager.listUserShift(principal.userId) }
                         .flatMapMany { shifts -> Flux.fromIterable(shifts) }
-                        .any(this::isShiftMatchCurrentTime)
-                        .flatMap { Mono.fromCallable { userManager.listUserRoles(principal.userId) } }
+                        .filter(this::isShiftMatchCurrentTime)
+                        .collectList()
+                        .flatMap { shiftList ->
+                            Mono.fromCallable {
+                                mutableListOf<UserRole>().apply {
+                                    this.addAll(userManager.listUserRoles(principal.userId).filter {
+                                        it.roleName != "生铁废钢验收角色"
+                                    })
+                                    shiftList.forEach { shift ->
+                                        this.add(UserRole().apply {
+                                            this.roleId = shift.role.roleName
+                                            this.roleName = shift.role.roleName
+                                        })
+                                    }
+                                }.toList()
+                            }
+                        }
                         .switchIfEmpty(Mono.fromCallable {
                             userManager.listUserRoles(principal.userId).filter {
                                 it.roleName != "生铁废钢验收角色" && it.roleName != "生铁废钢验收审核"

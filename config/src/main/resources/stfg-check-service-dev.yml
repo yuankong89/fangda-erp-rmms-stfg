@@ -9,7 +9,7 @@ eureka:
 logging:
   config: classpath:log4j2-dev.xml
   level:
-    root: info
+    root: debug
 
 rmms:
   jdbc:

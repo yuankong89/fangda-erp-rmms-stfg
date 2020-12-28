@@ -15,8 +15,8 @@ class UserShift {
     /**
      * 验收角色：卸车人员、验收人员、管理人员(自动化部)
      */
-    enum class Role(val value: Int) {
-        NONE(0), UNLOAD(5), ACCEPT(10), MANAGER(20);
+    enum class Role(val value: Int, val roleName: String) {
+        NONE(0, "无"), UNLOAD(5, "卸车人员"), ACCEPT(10, "验收人员"), MANAGER(20, "管理人员");
     }
 
     lateinit var role: Role

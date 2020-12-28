@@ -8,6 +8,7 @@ import com.fangda.erp.rmms.stfg.dto.accept.AcceptableMachineDto
 import com.fangda.erp.rmms.stfg.dto.accept.AcceptedMachineDto
 import com.fangda.erp.rmms.stfg.service.AcceptService
 import com.fangda.erp.rmms.stfg.service.MachineService
+import com.fangda.erp.rmms.stfg.utils.FileUtils
 import com.fangda.erp.rmms.stfg.web.param.accept.AcceptDataParam
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.nio.file.Files
 
 /**
  * @author yuhb
@@ -87,24 +87,9 @@ class AcceptController @Autowired constructor(
         @RequestPart("photos") photos: Flux<FilePart>,
         auth: Authentication
     ): Mono<InvokeResultDto> {
-        return photos.map {
-            val tempFile = Files.createTempFile("tmp", it.filename())
-            it.transferTo(tempFile)
-            tempFile
-        }
-            .map { it.toFile() }
+        return photos.map(FileUtils::templateSaveFile)
             .collectList()
-            .flatMap {
-                acceptService.handleAcceptData(
-                    rawMachineId,
-                    acceptParam.unloadPos,
-                    acceptParam.acceptDate,
-                    acceptParam.remark,
-                    acceptParam.acceptData,
-                    it,
-                    auth.name
-                )
-            }
+            .flatMap { acceptService.handleAcceptData(rawMachineId, acceptParam.acceptData, it, auth.name) }
             .map { InvokeResultDto.successResult("操作成功") }
             .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
     }
@@ -118,14 +103,7 @@ class AcceptController @Autowired constructor(
         @ModelAttribute acceptParam: AcceptDataParam,
         auth: Authentication
     ): Mono<InvokeResultDto> {
-        return acceptService.handleMidAcceptData(
-            rawMachineId,
-            acceptParam.unloadPos,
-            acceptParam.acceptDate,
-            acceptParam.remark,
-            acceptParam.acceptData,
-            auth.name
-        )
+        return acceptService.handleMidAcceptData(rawMachineId, acceptParam.acceptData, auth.name)
             .map { InvokeResultDto.successResult("操作成功") }
             .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
     }
@@ -150,24 +128,9 @@ class AcceptController @Autowired constructor(
         @RequestPart("photos") photos: Flux<FilePart>,
         auth: Authentication
     ): Mono<InvokeResultDto> {
-        return photos.map {
-            val tempFile = Files.createTempFile("tmp", it.filename())
-            it.transferTo(tempFile)
-            tempFile
-        }
-            .map { it.toFile() }
+        return photos.map(FileUtils::templateSaveFile)
             .collectList()
-            .flatMap {
-                acceptService.handleModifyAcceptData(
-                    rawMachineId,
-                    acceptParam.unloadPos,
-                    acceptParam.acceptDate,
-                    acceptParam.remark,
-                    acceptParam.acceptData,
-                    it,
-                    auth.name
-                )
-            }
+            .flatMap { acceptService.handleModifyAcceptData(rawMachineId, acceptParam.acceptData, it, auth.name) }
             .map { InvokeResultDto.successResult("操作成功") }
             .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
     }

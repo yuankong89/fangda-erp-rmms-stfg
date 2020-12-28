@@ -13,10 +13,8 @@ import com.fangda.erp.rmms.stfg.dto.unload.UnloadDataDto
 import com.fangda.erp.rmms.stfg.manager.AcceptManager
 import com.fangda.erp.rmms.stfg.manager.CheckManager
 import com.fangda.erp.rmms.stfg.manager.UnloadManager
-import com.fasterxml.jackson.core.type.TypeReference
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.netty.ByteBufMono
 import java.io.File
@@ -36,57 +34,26 @@ class AcceptService @Autowired constructor(
      */
     fun handleUnloadData(
         rawMachineId: String,
-        unloadPos: String,
-        unloadDate: String,
-        remark: String,
+        unloadDataStr: String,
         photos: List<File>,
         operator: String
     ): Mono<Boolean> {
-        return Mono.fromCallable {
-            unloadManager.newUnloadData(
-                rawMachineId,
-                unloadPos,
-                TimeUtils.parse(unloadDate, "yyyy-MM-dd HH:mm:ss"),
-                remark,
-                photos,
-                operator
-            )
-        }
+        return Mono.fromCallable { JsonUtils.parseObject(unloadDataStr, UnloadDataDto::class.java) }
+            .switchIfEmpty(Mono.error(BusinessException("解析数据错误!")))
+            .map { this.convertUnloadDataDtoToBO(it!!) }
+            .doOnNext { it.rawMachineId = rawMachineId }
+            .flatMap { Mono.fromCallable { unloadManager.newUnloadData(it, photos, operator) } }
             .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
     /**
      * 处理中段验收数据
      */
-    fun handleMidAcceptData(
-        rawMachineId: String,
-        unloadPos: String,
-        acceptDate: String,
-        remark: String,
-        acceptData: String,
-        operator: String
-    ): Mono<Boolean> {
-        return Mono.fromCallable {
-            JsonUtils.parseObject(
-                acceptData,
-                object : TypeReference<List<AcceptDataDetailDto>>() {})
-        }
+    fun handleMidAcceptData(rawMachineId: String, acceptDataStr: String, operator: String): Mono<Boolean> {
+        return Mono.fromCallable { JsonUtils.parseObject(acceptDataStr, AcceptDataDto::class.java) }
             .switchIfEmpty(Mono.error(BusinessException("解析数据错误!")))
-            .flatMapMany { Flux.fromIterable(it!!) }
-            .map { convertAcceptDataDetailDtoToBO(it) }
-            .collectList()
-            .flatMap {
-                Mono.fromCallable {
-                    acceptManager.newMidAcceptData(
-                        rawMachineId,
-                        unloadPos,
-                        TimeUtils.parse(acceptDate, "yyyy-MM-dd HH:mm:ss"),
-                        remark,
-                        it,
-                        operator
-                    )
-                }
-            }
+            .map { convertAcceptDataDtoToBO(it!!) }
+            .flatMap { Mono.fromCallable { acceptManager.newMidAcceptData(it, operator) } }
             .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
@@ -95,35 +62,15 @@ class AcceptService @Autowired constructor(
      */
     fun handleAcceptData(
         rawMachineId: String,
-        unloadPos: String,
-        acceptDate: String,
-        remark: String,
-        acceptData: String,
+        acceptDataStr: String,
         photos: List<File>,
         operator: String
     ): Mono<Boolean> {
-        return Mono.fromCallable {
-            JsonUtils.parseObject(
-                acceptData,
-                object : TypeReference<List<AcceptDataDetailDto>>() {})
-        }
+        return Mono.fromCallable { JsonUtils.parseObject(acceptDataStr, AcceptDataDto::class.java) }
             .switchIfEmpty(Mono.error(BusinessException("解析数据错误!")))
-            .flatMapMany { Flux.fromIterable(it!!) }
-            .map { convertAcceptDataDetailDtoToBO(it) }
-            .collectList()
-            .flatMap {
-                Mono.fromCallable {
-                    acceptManager.newAcceptData(
-                        rawMachineId,
-                        unloadPos,
-                        TimeUtils.parse(acceptDate, "yyyy-MM-dd HH:mm:ss"),
-                        remark,
-                        it,
-                        photos,
-                        operator
-                    )
-                }
-            }
+            .map { this.convertAcceptDataDtoToBO(it!!) }
+            .doOnNext { it.rawMachineId = rawMachineId }
+            .flatMap { Mono.fromCallable { acceptManager.newAcceptData(it, photos, operator) } }
             .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
@@ -188,22 +135,15 @@ class AcceptService @Autowired constructor(
      */
     fun handleModifyUnloadData(
         rawMachineId: String,
-        unloadPos: String,
-        unloadDate: String,
-        remark: String,
+        unloadDataStr: String,
         photos: List<File>,
         operator: String
     ): Mono<Boolean> {
-        return Mono.fromCallable {
-            unloadManager.modifyUnloadData(
-                rawMachineId,
-                unloadPos,
-                TimeUtils.parse(unloadDate, "yyyy-MM-dd HH:mm:ss"),
-                remark,
-                photos,
-                operator
-            )
-        }
+        return Mono.fromCallable { JsonUtils.parseObject(unloadDataStr, UnloadDataDto::class.java) }
+            .switchIfEmpty(Mono.error(BusinessException("解析数据错误!")))
+            .map { this.convertUnloadDataDtoToBO(it!!) }
+            .doOnNext { it.rawMachineId = rawMachineId }
+            .flatMap { Mono.fromCallable { unloadManager.modifyUnloadData(it, photos, operator) } }
             .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
@@ -212,35 +152,15 @@ class AcceptService @Autowired constructor(
      */
     fun handleModifyAcceptData(
         rawMachineId: String,
-        unloadPos: String,
-        acceptDate: String,
-        remark: String,
-        acceptData: String,
+        acceptDataStr: String,
         photos: List<File>,
         operator: String
     ): Mono<Boolean> {
-        return Mono.fromCallable {
-            JsonUtils.parseObject(
-                acceptData,
-                object : TypeReference<List<AcceptDataDetailDto>>() {})
-        }
+        return Mono.fromCallable { JsonUtils.parseObject(acceptDataStr, AcceptDataDto::class.java) }
             .switchIfEmpty(Mono.error(BusinessException("解析数据错误!")))
-            .flatMapMany { Flux.fromIterable(it!!) }
-            .map { convertAcceptDataDetailDtoToBO(it) }
-            .collectList()
-            .flatMap {
-                Mono.fromCallable {
-                    acceptManager.modifyAcceptData(
-                        rawMachineId,
-                        unloadPos,
-                        TimeUtils.parse(acceptDate, "yyyy-MM-dd HH:mm:ss"),
-                        remark,
-                        it,
-                        photos,
-                        operator
-                    )
-                }
-            }
+            .map { this.convertAcceptDataDtoToBO(it!!) }
+            .doOnNext { it.rawMachineId = rawMachineId }
+            .flatMap { Mono.fromCallable { acceptManager.modifyAcceptData(it, photos, operator) } }
             .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
@@ -256,6 +176,14 @@ class AcceptService @Autowired constructor(
     }
 
     // ---- private ----
+    private fun convertUnloadDataDtoToBO(data: UnloadDataDto): UnloadData {
+        return UnloadData().apply {
+            this.unloadPos = data.unloadPos
+            this.unloadDate = TimeUtils.parse(data.unloadDate, "yyyy-MM-dd HH:mm:ss")
+            this.unloadRemark = data.unloadRemark
+        }
+    }
+
     private fun convertUnloadDataBOToDto(data: UnloadData): UnloadDataDto {
         return UnloadDataDto().apply {
             this.unloadPos = data.unloadPos
@@ -264,19 +192,29 @@ class AcceptService @Autowired constructor(
         }
     }
 
+    private fun convertAcceptDataDtoToBO(data: AcceptDataDto): AcceptData {
+        return AcceptData().apply {
+            this.acceptPos = data.acceptPos
+            this.acceptDate = TimeUtils.parse(data.acceptDate, "yyyy-MM-dd HH:mm:ss")
+            this.acceptRemark = data.acceptRemark
+            this.details = data.details.map(this@AcceptService::convertAcceptDataDetailDtoToBO)
+        }
+    }
+
     private fun convertAcceptDataDetailDtoToBO(detail: AcceptDataDetailDto): AcceptDataDetail {
         return AcceptDataDetail().apply {
             this.dataNo = detail.dataNo
             this.dataName = detail.dataName
-            this.dataValue = detail.amount.toDouble()
+            this.dataValue = detail.dataValue.toDouble()
         }
     }
 
     private fun convertAcceptDataBOToDto(data: AcceptData): AcceptDataDto {
         return AcceptDataDto().apply {
-            this.unloadPos = data.acceptPos
-            this.checkData = TimeUtils.format(data.acceptDate, "yyyy-MM-dd HH:mm:ss")
-            this.remark = data.acceptRemark
+            this.rawMachineId = data.rawMachineId
+            this.acceptPos = data.acceptPos
+            this.acceptDate = TimeUtils.format(data.acceptDate, "yyyy-MM-dd HH:mm:ss")
+            this.acceptRemark = data.acceptRemark
             this.photoLinkList = mutableListOf<String>().apply {
                 for (i in 1..data.acceptPhotoCount) {
                     this.add("/accept/${data.rawMachineId}/photos/$i")
@@ -293,7 +231,7 @@ class AcceptService @Autowired constructor(
         return AcceptDataDetailDto().apply {
             this.dataNo = detail.dataNo
             this.dataName = detail.dataName
-            this.amount = detail.dataValue.toString()
+            this.dataValue = detail.dataValue.toString()
         }
     }
 }

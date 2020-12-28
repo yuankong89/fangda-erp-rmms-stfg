@@ -10,7 +10,9 @@ import org.apache.ibatis.annotations.Mapper
  */
 @Mapper
 interface UserDao {
-    // 获得用户的排班情况
+    /**
+     *  获得用户的排班情况
+     */
     fun listUserShiftByUserId(userId: String): List<UserShiftDO>
 
     /**

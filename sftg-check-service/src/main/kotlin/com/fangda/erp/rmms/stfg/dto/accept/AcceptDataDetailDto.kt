@@ -7,5 +7,5 @@ package com.fangda.erp.rmms.stfg.dto.accept
 class AcceptDataDetailDto {
     var dataNo: String = ""
     var dataName: String = ""
-    var amount: String = ""
+    var dataValue: String = ""
 }

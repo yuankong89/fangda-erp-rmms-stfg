@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
-import java.time.LocalDateTime
 
 /**
  * @author yuhb
@@ -33,24 +32,20 @@ class AcceptManager @Autowired constructor(
      */
     @Throws(PersistObjectException::class)
     fun newMidAcceptData(
-        rawMachineId: String,
-        acceptPos: String,
-        acceptDate: LocalDateTime,
-        remark: String,
-        details: List<AcceptDataDetail>,
+        acceptData: AcceptData,
         operator: String
     ): Boolean {
         val acceptDataDO = AcceptDataDO().apply {
-            this.rawMachineId = rawMachineId
-            this.acceptPos = acceptPos
-            this.checkTime = acceptDate
-            this.remark = remark
+            this.rawMachineId = acceptData.rawMachineId
+            this.acceptPos = acceptData.acceptPos
+            this.checkTime = acceptData.acceptDate
+            this.remark = acceptData.acceptRemark
             this.operator = operator
         }
         assertPersistSuccess(midAcceptDao.insertMidAcceptData(acceptDataDO) == 1) {
             "插入中段验收主记录错误"
         }
-        details.forEach {
+        acceptData.details.forEach {
             val acceptDetailDO = AcceptDetailDO().apply {
                 this.rawMachineId = rawMachineId
                 this.dataName = it.dataName
@@ -70,20 +65,16 @@ class AcceptManager @Autowired constructor(
      */
     @Throws(PersistObjectException::class)
     fun newAcceptData(
-        rawMachineId: String,
-        acceptPos: String,
-        acceptDate: LocalDateTime,
-        remark: String,
-        details: List<AcceptDataDetail>,
+        acceptData: AcceptData,
         photos: List<File>,
         operator: String
     ): Boolean {
         // 插入主记录
         val acceptDataDO = AcceptDataDO().apply {
-            this.rawMachineId = rawMachineId
-            this.acceptPos = acceptPos
-            this.checkTime = acceptDate
-            this.remark = remark
+            this.rawMachineId = acceptData.rawMachineId
+            this.acceptPos = acceptData.acceptPos
+            this.checkTime = acceptData.acceptDate
+            this.remark = acceptData.acceptRemark
             this.operator = operator
         }
         assertPersistSuccess(acceptDao.insertAcceptData(acceptDataDO) == 1) {
@@ -99,7 +90,7 @@ class AcceptManager @Autowired constructor(
                 "插入验收验收照片数据失败"
             }
         }
-        details.forEach {
+        acceptData.details.forEach {
             val acceptDetailDO = AcceptDetailDO().apply {
                 this.rawMachineId = rawMachineId
                 this.dataName = it.dataName
@@ -131,20 +122,16 @@ class AcceptManager @Autowired constructor(
      */
     @Throws(PersistObjectException::class)
     fun modifyAcceptData(
-        rawMachineId: String,
-        unloadPos: String,
-        acceptDate: LocalDateTime,
-        remark: String,
-        details: List<AcceptDataDetail>,
+        acceptData: AcceptData,
         photos: List<File>,
         operator: String
     ): Boolean {
         // 修改主记录
         val acceptDataDO = AcceptDataDO().apply {
-            this.rawMachineId = rawMachineId
-            this.acceptPos = acceptPos
-            this.checkTime = acceptDate
-            this.remark = remark
+            this.rawMachineId = acceptData.rawMachineId
+            this.acceptPos = acceptData.acceptPos
+            this.checkTime = acceptData.acceptDate
+            this.remark = acceptData.acceptRemark
             this.operator = operator
         }
         assertPersistSuccess(acceptDao.updateAcceptData(acceptDataDO) == 1) {
@@ -164,7 +151,7 @@ class AcceptManager @Autowired constructor(
         }
         // 删除明细数据
         acceptDao.deleteAcceptDataDetails(acceptDataDO.rawMachineId)
-        details.forEach {
+        acceptData.details.forEach {
             val acceptDetailDO = AcceptDetailDO().apply {
                 this.rawMachineId = rawMachineId
                 this.dataName = it.dataName

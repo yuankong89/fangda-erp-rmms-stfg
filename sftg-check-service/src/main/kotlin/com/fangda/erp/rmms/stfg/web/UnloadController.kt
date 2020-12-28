@@ -8,6 +8,7 @@ import com.fangda.erp.rmms.stfg.dto.unload.UnloadedMachineDto
 import com.fangda.erp.rmms.stfg.dto.unload.UnloadingMachineDto
 import com.fangda.erp.rmms.stfg.service.AcceptService
 import com.fangda.erp.rmms.stfg.service.MachineService
+import com.fangda.erp.rmms.stfg.utils.FileUtils
 import com.fangda.erp.rmms.stfg.web.param.unload.UnloadDataParam
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.nio.file.Files
 
 /**
  * @author yuhb
@@ -79,23 +79,9 @@ class UnloadController @Autowired constructor(
         @RequestPart("photos") photos: Flux<FilePart>,
         auth: Authentication
     ): Mono<InvokeResultDto> {
-        return photos.map {
-            val tempFile = Files.createTempFile("tmp", it.filename())
-            it.transferTo(tempFile)
-            tempFile
-        }
-            .map { it.toFile() }
+        return photos.map(FileUtils::templateSaveFile)
             .collectList()
-            .flatMap {
-                acceptService.handleUnloadData(
-                    rawMachineId,
-                    unloadParam.unloadPos,
-                    unloadParam.unloadDate,
-                    unloadParam.remark,
-                    it,
-                    auth.name
-                )
-            }
+            .flatMap { acceptService.handleUnloadData(rawMachineId, unloadParam.unloadData, it, auth.name) }
             .map { InvokeResultDto.successResult("操作成功") }
             .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
     }
@@ -120,23 +106,9 @@ class UnloadController @Autowired constructor(
         @RequestPart("photos") photos: Flux<FilePart>,
         auth: Authentication
     ): Mono<InvokeResultDto> {
-        return photos.map {
-            val tempFile = Files.createTempFile("tmp", it.filename())
-            it.transferTo(tempFile)
-            tempFile
-        }
-            .map { it.toFile() }
+        return photos.map(FileUtils::templateSaveFile)
             .collectList()
-            .flatMap {
-                acceptService.handleModifyUnloadData(
-                    rawMachineId,
-                    unloadParam.unloadPos,
-                    unloadParam.unloadDate,
-                    unloadParam.remark,
-                    it,
-                    auth.name
-                )
-            }
+            .flatMap { acceptService.handleModifyUnloadData(rawMachineId, unloadParam.unloadData, it, auth.name) }
             .map { InvokeResultDto.successResult("操作成功") }
             .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
     }

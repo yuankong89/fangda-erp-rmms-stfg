@@ -28,4 +28,8 @@ open class AcceptableMachine : Machine {
     // 卸车人员备注(部分压块有数据)
     var unloadRemark: String = ""
 
+    // 是否抽检车(仅废钢)
+    var checkPicked: Int = Int.MIN_VALUE
+
+    fun getCheckPickedValue(): Boolean = checkPicked != 0
 }

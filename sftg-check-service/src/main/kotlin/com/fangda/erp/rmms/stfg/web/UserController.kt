@@ -20,7 +20,7 @@ class UserController @Autowired constructor(
     private val userService: UserService
 ) {
     /**
-     * 获得用户的页面
+     * 获得用户的角色
      */
     @GetMapping("/roles")
     fun listUserRoles(authentication: Authentication): Mono<List<UserRoleDto>> {

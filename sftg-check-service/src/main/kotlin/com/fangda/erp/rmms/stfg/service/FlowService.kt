@@ -20,24 +20,29 @@ class FlowService @Autowired constructor(
     private val definitionManager: DefinitionManager
 ) {
     /**
-     * 获得验收时物资对应的类型
-     * JSON格式如下：
-     * ST：
-     * FG：
-     * YK：
-     * QT：
-     * ...
+     * 获得每个UI界面的参数
+     * 如:
+     * displayRawCode,
+     * displayLevelCode 等
      */
-    fun getAcceptType(): Mono<DefinitionDto> {
-        return Mono.fromCallable { definitionManager.getDefinitionByDefType("AcceptType") }
+    fun getUIParams(): Mono<DefinitionDto> {
+        return Mono.fromCallable { definitionManager.getDefinitionByDefType("UIParams") }
             .map(this::convertDefinitionBOToDto)
     }
 
     /**
-     * 通过物资编码获得验收表单
+     * 通过物资编码获得基本验收表单
      */
-    fun getAcceptFormByTypeCode(typeCode: String): Mono<DefinitionDto> {
-        return Mono.fromCallable { definitionManager.getDefinitionByDefType(typeCode) }
+    fun getAcceptFormByTypeCode(typeCode: String, levelCode: String): Mono<DefinitionDto> {
+        return Mono.fromCallable { definitionManager.getDefinitionByDefType("$typeCode,$levelCode") }
+            .map(this::convertDefinitionBOToDto)
+    }
+
+    /**
+     * 通过物资打级获得明细验收表单
+     */
+    fun getAcceptDetailForm(level: String): Mono<DefinitionDto> {
+        return Mono.fromCallable { definitionManager.getDefinitionByDefType(level) }
             .map(this::convertDefinitionBOToDto)
     }
 
@@ -53,19 +58,6 @@ class FlowService @Autowired constructor(
      */
     fun getStfgLevels(): Mono<List<StfgLevelDto>> {
         return Mono.just(STFG_LEVELS)
-    }
-
-    /**
-     * 定义类型
-     * [data]为Json格式
-     * ST: (1000123,1002),(1000123,1002)
-     * FG: (1000123,1002),(1000123,1002)
-     * QT: (1000123,1002),(1000123,1002)
-     * 直接存储数据，不做处理
-     */
-    fun defineTypes(data: String): Mono<Boolean> {
-        return Mono.fromCallable { definitionManager.modifyDefinition("AcceptType", data) }
-            .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
     /**

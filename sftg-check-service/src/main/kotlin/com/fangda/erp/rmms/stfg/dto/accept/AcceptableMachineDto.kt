@@ -16,4 +16,5 @@ open class AcceptableMachineDto {
     var grossWeight: String = ""
     var grossWeightTime: String = ""
     var preRawLevel: String = ""
+    var checkPicked: Boolean = false
 }

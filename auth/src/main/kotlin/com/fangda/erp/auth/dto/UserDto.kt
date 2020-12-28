@@ -13,5 +13,6 @@ package com.fangda.erp.auth.dto
 class UserDto {
     var userId = ""
     var username = ""
-    var depName = ""
+    var depId = ""
+    var telephone = ""
 }

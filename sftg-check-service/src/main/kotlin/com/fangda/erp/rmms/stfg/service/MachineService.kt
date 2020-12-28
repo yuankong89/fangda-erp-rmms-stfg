@@ -139,6 +139,8 @@ class MachineService @Autowired constructor(
             this.grossWeight = acceptableMachine.grossWeight.toString()
             this.grossWeightTime = TimeUtils.format(acceptableMachine.grossWeightTime, "yyyy-MM-dd HH:mm:ss")
             this.preRawLevel = acceptableMachine.preRawLevel
+
+            this.checkPicked = acceptableMachine.getCheckPickedValue()
         }
     }
 

@@ -5,6 +5,7 @@ import com.fangda.erp.libs.exception.BusinessException
 import com.fangda.erp.rmms.stfg.dto.depack.DePackDataDto
 import com.fangda.erp.rmms.stfg.dto.depack.DePackMachineDto
 import com.fangda.erp.rmms.stfg.service.DePackService
+import com.fangda.erp.rmms.stfg.utils.FileUtils
 import com.fangda.erp.rmms.stfg.web.param.depack.DePackDataParams
 import com.fangda.erp.rmms.stfg.web.param.depack.DePackSearchParams
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,7 +14,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.nio.file.Files
 
 /**
  * @author yuhb
@@ -91,12 +91,7 @@ class DePackController @Autowired constructor(
         @RequestPart("photos") photos: Flux<FilePart>,
         auth: Authentication
     ): Mono<InvokeResultDto> {
-        return photos.map {
-            val tempFile = Files.createTempFile("tmp", it.filename())
-            it.transferTo(tempFile)
-            tempFile
-        }
-            .map { it.toFile() }
+        return photos.map(FileUtils::templateSaveFile)
             .collectList()
             .flatMap { dePackService.endDePack(rawMachineId, params.dePackData, it, auth.name) }
             .map { InvokeResultDto.successResult("操作成功") }

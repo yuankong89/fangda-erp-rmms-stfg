@@ -7,7 +7,6 @@ import com.fangda.erp.rmms.stfg.dto.customize.StfgLevelDto
 import com.fangda.erp.rmms.stfg.dto.customize.StfgTypeDto
 import com.fangda.erp.rmms.stfg.service.FlowService
 import com.fangda.erp.rmms.stfg.web.param.customize.DefineFormParam
-import com.fangda.erp.rmms.stfg.web.param.customize.DefineTypesParam
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
@@ -23,21 +22,28 @@ class CustomizeController @Autowired constructor(
 ) {
     /**
      * 应用启动时自动加载并保存
-     * 根据[typeCode]，获得物资的验收表单
+     * 获得所有UI对应的参数
+     * 返回Json类型
      */
-    @GetMapping("/accept/form")
-    fun getAcceptForm(typeCode: String): Mono<DefinitionDto> {
-        return flowService.getAcceptFormByTypeCode(typeCode)
+    @GetMapping("/ui/params")
+    fun getUIParams(): Mono<DefinitionDto> {
+        return flowService.getUIParams()
     }
 
     /**
-     * 应用启动时自动加载并保存
-     * 获得所有类型对应的物资
-     * 返回Json类型
+     * 获取生铁废钢的第一层表单，包含基本验收信息，和打级表单
      */
-    @GetMapping("/accept/type")
-    fun getAcceptType(): Mono<DefinitionDto> {
-        return flowService.getAcceptType()
+    @GetMapping("/accept/form")
+    fun getAcceptForm(typeCode: String, levelCode: String): Mono<DefinitionDto> {
+        return flowService.getAcceptFormByTypeCode(typeCode, levelCode)
+    }
+
+    /**
+     * 获取生铁废钢的明细表单，包含明细验收项目
+     */
+    @GetMapping("accept/form/detail")
+    fun getAcceptForm(level: String): Mono<DefinitionDto> {
+        return flowService.getAcceptDetailForm(level)
     }
 
     /**
@@ -51,23 +57,6 @@ class CustomizeController @Autowired constructor(
     @GetMapping("/stfg/level")
     fun listStfgLevel(): Mono<List<StfgLevelDto>> {
         return flowService.getStfgLevels()
-    }
-
-    /**
-     * 定义验收类型, 如:
-     * ST: (1000123,1002),(1000123,1002)
-     * FG: (1000123,1002),(1000123,1002)
-     * QT: (1000123,1002),(1000123,1002)
-     */
-    @PostMapping("/types")
-    fun defineTypes(@ModelAttribute defineTypesParam: DefineTypesParam): Mono<InvokeResultDto> {
-        return if (defineTypesParam.data.isNotEmpty()) {
-            flowService.defineTypes(defineTypesParam.data)
-                .map { InvokeResultDto.successResult("操作成功") }
-                .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
-        } else {
-            Mono.just(InvokeResultDto.failResult("未传入参数"))
-        }
     }
 
     /**
