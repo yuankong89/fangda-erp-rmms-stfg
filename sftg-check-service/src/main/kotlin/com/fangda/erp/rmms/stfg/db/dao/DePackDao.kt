@@ -21,4 +21,7 @@ interface DePackDao {
     fun updateDePackData(dePackDataDO: DePackDataDO): Int
     fun insertDePackDataDetail(dePackDetailDO: DePackDetailDO): Int
     fun insertDePackPhoto(dePackPhotoDO: DePackPhotoDO): Int
+
+    fun deleteDePackDataDetail(rawMachineId: String): Int
+    fun deleteDePackPhoto(rawMachineId: String): Int
 }

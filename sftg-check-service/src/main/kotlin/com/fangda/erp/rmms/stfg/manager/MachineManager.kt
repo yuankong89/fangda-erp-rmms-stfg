@@ -93,7 +93,7 @@ class MachineManager @Autowired constructor(
                     return
                 }
             }
-            val maxFlowNo = machineDao.selectMaxFlowNo(prefix)
+            val maxFlowNo = machineDao.getMaxFlowNo(prefix)
             val newNo = if (maxFlowNo.isEmpty()) {
                 1
             } else {

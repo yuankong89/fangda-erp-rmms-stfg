@@ -2,13 +2,13 @@ package com.fangda.erp.rmms.stfg.dto
 
 /**
  * @author yuhb
- * @date 2020/11/10
+ * @date 2021/3/10
  */
-class DePackMachineDto {
+class RefundMachineDto {
     var rawMachineId: String = ""
     var liscenceNo: String = ""
     var flowNo: String = ""
-    var stateStr: String = ""
-    var state: String = ""
-    var createTime: String = ""
+    var refundDate: String = ""
+    var refundOper: String = ""
+    var refundReason: String = ""
 }

@@ -20,7 +20,7 @@ class DefinitionManager @Autowired constructor(
      * 通过[defType]获得数据
      */
     fun getDefinitionByDefType(defType: String): Definition {
-        return this.convertDefinitionDOToBo(definitionDao.selectByDefType(defType))
+        return this.convertDefinitionDOToBo(definitionDao.getByDefType(defType))
     }
 
     /**

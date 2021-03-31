@@ -51,7 +51,7 @@
         )
     </insert>
 
-    <select id="selectAcceptData" resultMap="AcceptDataMap">
+    <select id="getAcceptData" resultMap="AcceptDataMap">
         SELECT  IC.RAW_MACHINE_ID,
                 IC.UNLOAD_POS,
                 IC.REMARK,
@@ -125,7 +125,7 @@
             WHERE T.RAW_MACHINE_ID = #{rawMachineId}
     </delete>
 
-    <select id="selectAcceptPhoto" resultMap="AcceptPhotoMap">
+    <select id="getAcceptPhoto" resultMap="AcceptPhotoMap">
         SELECT
             T.RAW_MACHINE_ID,
             T.NO,

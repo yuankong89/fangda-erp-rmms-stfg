@@ -9,6 +9,6 @@ import org.apache.ibatis.annotations.Mapper
  */
 @Mapper
 interface DefinitionDao {
-    fun selectByDefType(defType: String): DefinitionDO
+    fun getByDefType(defType: String): DefinitionDO
     fun insertDefinition(definitionDO: DefinitionDO): Int
 }

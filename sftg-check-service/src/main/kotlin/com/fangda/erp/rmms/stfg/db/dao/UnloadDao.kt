@@ -16,7 +16,7 @@ interface UnloadDao {
     fun insertUnloadPhoto(unloadPhotoDO: UnloadPhotoDO): Int
 
     // 查询卸车数据
-    fun selectUnloadData(rawMachineId: String): UnloadDataDO
+    fun getUnloadData(rawMachineId: String): UnloadDataDO
 
     // 修改卸车数据
     fun updateUnloadData(unloadDataDO: UnloadDataDO): Int
@@ -31,5 +31,5 @@ interface UnloadDao {
     fun deleteSelfCheckFlag(rawMachineId: String): Int
 
     // 查看卸车照片
-    fun selectUnloadPhoto(rawMachineId: String, photoNo: Int): UnloadPhotoDO
+    fun getUnloadPhoto(rawMachineId: String, photoNo: Int): UnloadPhotoDO
 }

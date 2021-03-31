@@ -37,12 +37,7 @@ class DePackService @Autowired constructor(
             .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
-    fun endDePack(
-        rawMachineId: String,
-        dePackData: String,
-        photos: List<File>,
-        operator: String
-    ): Mono<Boolean> {
+    fun endDePack(rawMachineId: String, dePackData: String, photos: List<File>, operator: String): Mono<Boolean> {
         return Mono.fromCallable {
             JsonUtils.parseObject(
                 dePackData,
@@ -77,6 +72,30 @@ class DePackService @Autowired constructor(
     fun getDePackData(rawMachineId: String): Mono<DePackDataDto> {
         return Mono.fromCallable { dePackManager.getDePackData(rawMachineId) }
             .map { this.convertDePackDataBOToDto(it) }
+    }
+
+    fun modifyDePackData(
+        rawMachineId: String,
+        dePackData: String,
+        photos: List<File>,
+        operator: String
+    ): Mono<Boolean> {
+        return Mono.fromCallable {
+            JsonUtils.parseObject(
+                dePackData,
+                object : TypeReference<List<DePackDataDetailDto>>() {})
+        }
+            .switchIfEmpty(Mono.error(BusinessException("解析数据错误!")))
+            .flatMapMany { Flux.fromIterable(it!!) }
+            .map { convertDePackDataDetailDtoToBO(it) }
+            .collectList()
+            .flatMap { Mono.fromCallable { dePackManager.modifyDePackData(rawMachineId, it, photos, operator) } }
+            .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
+    }
+
+    fun passDePack(rawMachineId: String, operator: String): Mono<Boolean> {
+        return Mono.fromCallable { dePackManager.passDePack(rawMachineId, operator) }
+            .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
     // ---- private -----

@@ -10,8 +10,8 @@ import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
 plugins {
     id("org.springframework.boot") version "2.3.5.RELEASE" apply false
     id("io.spring.dependency-management") version "1.0.10.RELEASE" apply false
-    kotlin("jvm") version "1.4.10"
-    kotlin("plugin.spring") version "1.4.10"
+    kotlin("jvm") version "1.4.31"
+    kotlin("plugin.spring") version "1.4.31"
 }
 
 repositories {

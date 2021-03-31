@@ -38,7 +38,7 @@
         )
     </insert>
 
-    <select id="selectMidAcceptData" resultMap="com.fangda.erp.rmms.stfg.db.dao.AcceptDao.AcceptDataMap">
+    <select id="getMidAcceptData" resultMap="com.fangda.erp.rmms.stfg.db.dao.AcceptDao.AcceptDataMap">
         SELECT  IC.RAW_MACHINE_ID,
         IC.UNLOAD_POS,
         IC.REMARK,

@@ -29,9 +29,7 @@ class DePackController @Autowired constructor(
      * 根据条件查询待解包车辆
      */
     @GetMapping("")
-    fun listDePacksByCriteria(
-        @ModelAttribute params: DePackSearchParams,
-    ): Mono<List<DePackMachineDto>> {
+    fun listDePacksByCriteria(@ModelAttribute params: DePackSearchParams): Mono<List<DePackMachineDto>> {
         if (params.stateIn == null && params.supplierId == null) {
             return Mono.empty()
         }
@@ -94,6 +92,34 @@ class DePackController @Autowired constructor(
         return photos.map(FileUtils::templateSaveFile)
             .collectList()
             .flatMap { dePackService.endDePack(rawMachineId, params.dePackData, it, auth.name) }
+            .map { InvokeResultDto.successResult("操作成功") }
+            .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
+    }
+
+    /**
+     * 解包数据修改，
+     * 未审核数据可以修改
+     */
+    @PostMapping("/{rawMachineId}/modify")
+    fun dePackModify(
+        @PathVariable("rawMachineId") rawMachineId: String,
+        @ModelAttribute params: DePackDataParams,
+        @RequestPart("photos") photos: Flux<FilePart>,
+        auth: Authentication
+    ): Mono<InvokeResultDto> {
+        return photos.map(FileUtils::templateSaveFile)
+            .collectList()
+            .flatMap { dePackService.modifyDePackData(rawMachineId, params.dePackData, it, auth.name) }
+            .map { InvokeResultDto.successResult("操作成功") }
+            .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
+    }
+
+    /**
+     * 解包数据审核，审核后则无法再修改数据
+     */
+    @PostMapping("/{rawMachineId}/pass")
+    fun dePackPass(@PathVariable("rawMachineId") rawMachineId: String, auth: Authentication): Mono<InvokeResultDto> {
+        return Mono.fromCallable { dePackService.passDePack(rawMachineId, auth.name) }
             .map { InvokeResultDto.successResult("操作成功") }
             .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
     }

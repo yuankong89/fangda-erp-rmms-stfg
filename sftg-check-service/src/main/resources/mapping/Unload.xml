@@ -37,7 +37,7 @@
         )
     </insert>
 
-    <select id="selectUnloadData" resultMap="UnloadDataMap">
+    <select id="getUnloadData" resultMap="UnloadDataMap">
         SELECT  IC.RAW_MACHINE_ID,
                 IC.UNLOAD_POS,
                 IC.REMARK,
@@ -88,7 +88,7 @@
             WHERE T.RAW_MACHINE_ID = #{rawMachineId}
     </delete>
 
-    <select id="selectUnloadPhoto" resultMap="UnloadPhotoMap">
+    <select id="getUnloadPhoto" resultMap="UnloadPhotoMap">
         SELECT
             T.RAW_MACHINE_ID,
             T.NO,

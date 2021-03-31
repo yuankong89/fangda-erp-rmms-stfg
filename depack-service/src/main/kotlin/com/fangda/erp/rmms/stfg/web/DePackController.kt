@@ -77,13 +77,11 @@ class DePackController @Autowired constructor(
      * 根据条件查询待解包车辆
      */
     @GetMapping("")
-    fun listDePacksByCriteria(
-        @ModelAttribute params: DePackSearchParams,
-    ): Mono<List<DePackMachineDto>> {
+    fun listDePacksByCriteria(@ModelAttribute params: DePackSearchParams): Mono<List<DePackMachineDto>> {
         if (params.stateIn == null && params.supplierId == null) {
             return Mono.empty()
         }
-        return dePackService.listDePackByCriteria(
+        return dePackService.listDePackMachinesByCriteria(
             params.stateIn,
             params.supplierId,
             params.startTime,
@@ -97,5 +95,61 @@ class DePackController @Autowired constructor(
     @GetMapping("/{rawMachineId}")
     fun getDePackData(@PathVariable("rawMachineId") rawMachineId: String): Mono<DePackDataDto> {
         return dePackService.getDePackData(rawMachineId)
+    }
+
+    /**
+     * 解包数据修改，
+     * 未审核数据可以修改
+     */
+    @PostMapping("/{rawMachineId}/modify")
+    fun dePackModify(
+        @PathVariable("rawMachineId") rawMachineId: String,
+        @ModelAttribute params: DePackControllerParams,
+        @RequestPart("photos") photos: Flux<FilePart>
+    ): Mono<InvokeResultDto> {
+        return photos.map {
+            val tempFile = Files.createTempFile("tmp", it.filename())
+            it.transferTo(tempFile)
+            tempFile
+        }
+            .map { it.toFile() }
+            .collectList()
+            .flatMap { dePackService.modifyDePackData(rawMachineId, params.dePackData, it, params.operator) }
+            .map { InvokeResultDto.successResult("操作成功") }
+            .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
+    }
+
+    /**
+     * 解包数据审核，审核后则无法再修改数据
+     */
+    @PostMapping("/{rawMachineId}/pass")
+    fun dePackPass(
+        @PathVariable("rawMachineId") rawMachineId: String,
+        @ModelAttribute params: DePackControllerParams
+    ): Mono<InvokeResultDto> {
+        return dePackService.passDePack(rawMachineId, params.operator)
+            .map { InvokeResultDto.successResult("操作成功") }
+            .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
+    }
+
+    /**
+     * 根据条件查询跟踪解包车辆
+     */
+    @GetMapping("/trace")
+    fun listDePacksTraceByCriteria(): Mono<List<DePackMachineDto>> {
+        return dePackService.listDePackTraceMachines()
+    }
+
+    /**
+     * 解包跟踪数据上传
+     */
+    @PostMapping("/trace/{rawMachineId}/end")
+    fun dePackTraceEnd(
+        @PathVariable("rawMachineId") rawMachineId: String,
+        @ModelAttribute params: DePackControllerParams
+    ): Mono<InvokeResultDto> {
+        return dePackService.endDePackTrace(rawMachineId, params.dePackData, params.operator)
+            .map { InvokeResultDto.successResult("操作成功") }
+            .onErrorResume(BusinessException::class.java) { Mono.just(InvokeResultDto.failResult(it.message!!)) }
     }
 }

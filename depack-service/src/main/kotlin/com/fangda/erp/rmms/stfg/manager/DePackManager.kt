@@ -6,10 +6,10 @@ import com.fangda.erp.rmms.stfg.bo.DePackData
 import com.fangda.erp.rmms.stfg.bo.DePackDataDetail
 import com.fangda.erp.rmms.stfg.bo.DePackMachine
 import com.fangda.erp.rmms.stfg.db.dao.DePackDao
-import com.fangda.erp.rmms.stfg.db.dataobject.DePackDataDO
-import com.fangda.erp.rmms.stfg.db.dataobject.DePackDetailDO
-import com.fangda.erp.rmms.stfg.db.dataobject.DePackMachineDO
-import com.fangda.erp.rmms.stfg.db.dataobject.DePackPhotoDO
+import com.fangda.erp.rmms.stfg.db.dataobject.depack.DePackDataDO
+import com.fangda.erp.rmms.stfg.db.dataobject.depack.DePackDetailDO
+import com.fangda.erp.rmms.stfg.db.dataobject.depack.DePackMachineDO
+import com.fangda.erp.rmms.stfg.db.dataobject.depack.DePackPhotoDO
 import com.fangda.erp.rmms.stfg.db.query.DePackMachineQuery
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -125,11 +125,85 @@ class DePackManager @Autowired constructor(
         }
         val dePackDataDO = DePackDataDO().apply {
             this.rawMachineId = rawMachineId
-            this.state = DePackMachine.DePackMachineEnum.END.value
+            this.state = DePackMachine.DePackMachineEnum.End.value
             this.endTime = TimeUtils.now()
             this.checkOperator = operator
         }
         return assertPersistSuccess(dePackDao.updateDePackData(dePackDataDO) == 1) {
+            "更新数据失败!"
+        }
+    }
+
+    /**
+     * IO
+     * 修改解包数据
+     */
+    @Throws(PersistObjectException::class)
+    fun modifyDePackData(
+        rawMachineId: String,
+        details: List<DePackDataDetail>,
+        photos: List<File>,
+        operator: String
+    ): Boolean {
+        // 删除数据
+        this.dePackDao.deleteDePackDataDetail(rawMachineId)
+        this.dePackDao.deleteDePackPhoto(rawMachineId)
+        return this.endDePack(rawMachineId, details, photos, operator)
+    }
+
+    /**
+     * IO
+     * 车辆解包数据审核结束
+     */
+    @Throws(PersistObjectException::class)
+    fun passDePack(rawMachineId: String, operator: String): Boolean {
+        val dePackDataDO = DePackDataDO().apply {
+            this.rawMachineId = rawMachineId
+            this.state = DePackMachine.DePackMachineEnum.Pass.value
+            this.passTime = TimeUtils.now()
+            this.passOperator = operator
+        }
+        return assertPersistSuccess(dePackDao.updateDePackData(dePackDataDO) == 1) {
+            "更新数据失败!"
+        }
+    }
+
+    /**
+     * IO
+     * 查询拆包跟踪车辆数据
+     */
+    fun listDePackTraceMachine(): List<DePackMachine> {
+        return dePackDao.listDePackTraceMachine().map { this.convertDePackMachineDOToBO(it) }
+    }
+
+    /**
+     * IO
+     * 车辆完成解包
+     */
+    @Throws(PersistObjectException::class)
+    fun endDePackTrace(
+        rawMachineId: String,
+        details: List<DePackDataDetail>,
+        operator: String
+    ): Boolean {
+        details.forEach {
+            val dePackDetailDO = DePackDetailDO().apply {
+                this.rawMachineId = rawMachineId
+                this.dataName = it.dataName
+                this.dataNo = it.dataNo
+                this.dataValue = it.dataValue
+            }
+            assertPersistSuccess(dePackDao.insertDePackTraceDataDetail(dePackDetailDO) == 1) {
+                "插入解包明细数据失败"
+            }
+        }
+        val dePackDataDO = DePackDataDO().apply {
+            this.rawMachineId = rawMachineId
+            this.state = DePackMachine.DePackMachineEnum.End.value
+            this.endTime = TimeUtils.now()
+            this.checkOperator = operator
+        }
+        return assertPersistSuccess(dePackDao.updateDePackTraceData(dePackDataDO) == 1) {
             "更新数据失败!"
         }
     }
@@ -141,6 +215,7 @@ class DePackManager @Autowired constructor(
             this.flowNo = machine.flowNo
             this.liscenceNo = machine.liscenceNo
             this.state = DePackMachine.DePackMachineEnum.valueOf(machine.state)
+            this.createTime = machine.createTime
         }
     }
 

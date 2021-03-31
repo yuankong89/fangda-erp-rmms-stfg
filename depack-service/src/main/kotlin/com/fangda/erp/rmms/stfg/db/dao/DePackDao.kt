@@ -1,9 +1,9 @@
 package com.fangda.erp.rmms.stfg.db.dao
 
-import com.fangda.erp.rmms.stfg.db.dataobject.DePackDataDO
-import com.fangda.erp.rmms.stfg.db.dataobject.DePackDetailDO
-import com.fangda.erp.rmms.stfg.db.dataobject.DePackMachineDO
-import com.fangda.erp.rmms.stfg.db.dataobject.DePackPhotoDO
+import com.fangda.erp.rmms.stfg.db.dataobject.depack.DePackDataDO
+import com.fangda.erp.rmms.stfg.db.dataobject.depack.DePackDetailDO
+import com.fangda.erp.rmms.stfg.db.dataobject.depack.DePackMachineDO
+import com.fangda.erp.rmms.stfg.db.dataobject.depack.DePackPhotoDO
 import com.fangda.erp.rmms.stfg.db.query.DePackMachineQuery
 import org.apache.ibatis.annotations.Mapper
 
@@ -21,4 +21,12 @@ interface DePackDao {
     fun updateDePackData(dePackDataDO: DePackDataDO): Int
     fun insertDePackDataDetail(dePackDetailDO: DePackDetailDO): Int
     fun insertDePackPhoto(dePackPhotoDO: DePackPhotoDO): Int
+
+    fun deleteDePackDataDetail(rawMachineId: String): Int
+    fun deleteDePackPhoto(rawMachineId: String): Int
+
+    // 跟踪拆包
+    fun listDePackTraceMachine(): List<DePackMachineDO>
+    fun insertDePackTraceDataDetail(dePackDetailDO: DePackDetailDO): Int
+    fun updateDePackTraceData(dePackDataDO: DePackDataDO): Int
 }

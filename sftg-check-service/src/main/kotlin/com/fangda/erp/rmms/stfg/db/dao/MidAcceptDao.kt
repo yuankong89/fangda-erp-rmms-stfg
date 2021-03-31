@@ -15,6 +15,6 @@ interface MidAcceptDao {
     fun insertMidAcceptDataDetail(acceptDetailDO: AcceptDetailDO): Int
 
     // 查询中段验收数据
-    fun selectMidAcceptData(rawMachineId: String): AcceptDataDO
+    fun getMidAcceptData(rawMachineId: String): AcceptDataDO
     fun listMidAcceptDataDetails(rawMachineId: String): List<AcceptDetailDO>
 }

@@ -41,7 +41,7 @@ class CustomizeController @Autowired constructor(
     /**
      * 获取生铁废钢的明细表单，包含明细验收项目
      */
-    @GetMapping("accept/form/detail")
+    @GetMapping("/accept/form/detail")
     fun getAcceptForm(level: String): Mono<DefinitionDto> {
         return flowService.getAcceptDetailForm(level)
     }

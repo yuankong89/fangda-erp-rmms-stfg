@@ -1,10 +1,0 @@
-server:
-  port: 52600
-
-spring:
-  profiles:    active: native  application:    name: config
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:52700/eureka/

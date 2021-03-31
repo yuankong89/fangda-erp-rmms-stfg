@@ -94,7 +94,7 @@ class UnloadManager @Autowired constructor(
     }
 
     fun getUnloadData(rawMachineId: String): UnloadData {
-        val unloadData = unloadDao.selectUnloadData(rawMachineId)
+        val unloadData = unloadDao.getUnloadData(rawMachineId)
         return UnloadData().apply {
             this.unloadPos = unloadData.unloadPos
             this.unloadDate = unloadData.checkTime
@@ -103,7 +103,7 @@ class UnloadManager @Autowired constructor(
     }
 
     fun getUnloadPhoto(rawMachineId: String, photoNo: Int): Photo {
-        val unloadPhotoDO = unloadDao.selectUnloadPhoto(rawMachineId, photoNo)
+        val unloadPhotoDO = unloadDao.getUnloadPhoto(rawMachineId, photoNo)
         return Photo().apply {
             this.data = unloadPhotoDO.photo
         }

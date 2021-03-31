@@ -56,7 +56,7 @@ class DePackService @Autowired constructor(
             .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
     }
 
-    fun listDePackByCriteria(
+    fun listDePackMachinesByCriteria(
         stateIn: String? = null,
         supplierId: String? = null,
         startTimeStr: String? = null,
@@ -79,6 +79,51 @@ class DePackService @Autowired constructor(
             .map { this.convertDePackDataBOToDto(it) }
     }
 
+    fun modifyDePackData(
+        rawMachineId: String,
+        dePackData: String,
+        photos: List<File>,
+        operator: String
+    ): Mono<Boolean> {
+        return Mono.fromCallable {
+            JsonUtils.parseObject(
+                dePackData,
+                object : TypeReference<List<DePackDataDetailDto>>() {})
+        }
+            .switchIfEmpty(Mono.error(BusinessException("解析数据错误!")))
+            .flatMapMany { Flux.fromIterable(it!!) }
+            .map { convertDePackDataDetailDtoToBO(it) }
+            .collectList()
+            .flatMap { Mono.fromCallable { dePackManager.modifyDePackData(rawMachineId, it, photos, operator) } }
+            .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
+    }
+
+    fun passDePack(rawMachineId: String, operator: String): Mono<Boolean> {
+        return Mono.fromCallable { dePackManager.passDePack(rawMachineId, operator) }
+            .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
+    }
+
+    fun listDePackTraceMachines(): Mono<List<DePackMachineDto>> {
+        return Mono.fromCallable { dePackManager.listDePackTraceMachine() }
+            .flatMapMany { Flux.fromIterable(it) }
+            .map { this.convertDePackMachineBOToDto(it) }
+            .collectList()
+    }
+
+    fun endDePackTrace(rawMachineId: String, dePackData: String, operator: String): Mono<Boolean> {
+        return Mono.fromCallable {
+            JsonUtils.parseObject(
+                dePackData,
+                object : TypeReference<List<DePackDataDetailDto>>() {})
+        }
+            .switchIfEmpty(Mono.error(BusinessException("解析数据错误!")))
+            .flatMapMany { Flux.fromIterable(it!!) }
+            .map { convertDePackDataDetailDtoToBO(it) }
+            .collectList()
+            .flatMap { Mono.fromCallable { dePackManager.endDePackTrace(rawMachineId, it, operator) } }
+            .onErrorMap(PersistObjectException::class.java) { BusinessException(it.message ?: "未知错误") }
+    }
+
     // ---- private -----
     private fun convertDePackDataDetailDtoToBO(detail: DePackDataDetailDto): DePackDataDetail {
         return DePackDataDetail().apply {
@@ -95,6 +140,11 @@ class DePackService @Autowired constructor(
             this.liscenceNo = machine.liscenceNo
             this.state = machine.state.value.toString()
             this.stateStr = machine.state.stateStr
+            if (machine.createTime != null) {
+                this.createTime = TimeUtils.format(machine.createTime!!, "yyyy-MM-dd HH:mm:ss")
+            } else {
+                this.createTime = ""
+            }
         }
     }
 

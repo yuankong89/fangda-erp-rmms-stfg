@@ -166,7 +166,7 @@ class AcceptManager @Autowired constructor(
     }
 
     fun getAcceptData(rawMachineId: String): AcceptData {
-        val acceptData = acceptDao.selectAcceptData(rawMachineId)
+        val acceptData = acceptDao.getAcceptData(rawMachineId)
         val acceptDataDetailDOs = acceptDao.listAcceptDataDetails(rawMachineId)
         val dePackPhotoCount = dePackDao.countDePackPhotoById(rawMachineId)
         val acceptPhotoCount = acceptDao.countAcceptPhotoById(rawMachineId)
@@ -188,7 +188,7 @@ class AcceptManager @Autowired constructor(
     }
 
     fun getMidAcceptData(rawMachineId: String): AcceptData {
-        val acceptData = midAcceptDao.selectMidAcceptData(rawMachineId)
+        val acceptData = midAcceptDao.getMidAcceptData(rawMachineId)
         val acceptDataDetailDOs = midAcceptDao.listMidAcceptDataDetails(rawMachineId)
         return AcceptData().apply {
             this.rawMachineId = rawMachineId
@@ -206,7 +206,7 @@ class AcceptManager @Autowired constructor(
     }
 
     fun getAcceptPhoto(rawMachineId: String, photoNo: Int): Photo {
-        val acceptPhotoDO = acceptDao.selectAcceptPhoto(rawMachineId, photoNo)
+        val acceptPhotoDO = acceptDao.getAcceptPhoto(rawMachineId, photoNo)
         return Photo().apply {
             this.data = acceptPhotoDO.photo
         }

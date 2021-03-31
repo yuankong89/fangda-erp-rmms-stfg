@@ -17,7 +17,7 @@ interface AcceptDao {
     fun insertAcceptPhoto(acceptPhotoDO: AcceptPhotoDO): Int
 
     // 查询验收数据
-    fun selectAcceptData(rawMachineId: String): AcceptDataDO
+    fun getAcceptData(rawMachineId: String): AcceptDataDO
     fun listAcceptDataDetails(rawMachineId: String): List<AcceptDetailDO>
 
     // 修改验收数据
@@ -35,6 +35,6 @@ interface AcceptDao {
     fun deleteSelfCheckFlag(rawMachineId: String): Int
 
     // 验收照片
-    fun selectAcceptPhoto(rawMachineId: String, photoNo: Int): AcceptPhotoDO
+    fun getAcceptPhoto(rawMachineId: String, photoNo: Int): AcceptPhotoDO
     fun countAcceptPhotoById(rawMachineId: String): Int
 }

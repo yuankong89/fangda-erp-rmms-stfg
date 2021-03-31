@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 /*
  * Copyright (c) 2020.
  * 方大特钢科技股份有限公司
@@ -8,6 +10,7 @@ version="0.0.1-SNAPSHOT"
 
 plugins {
     id("application")
+    kotlin("jvm")
 }
 
 dependencies {
@@ -27,9 +30,21 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.+")
     implementation("com.auth0:java-jwt:3.10.3")
     implementation(project(":erplibs"))
-    implementation(project(":authlibs"))
+//    implementation(project(":authlibs"))
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 application {
     mainClass.set("com.fangda.erp.rmms.stfg.StfgAcceptApp")
+}
+repositories {
+    mavenCentral()
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
 }

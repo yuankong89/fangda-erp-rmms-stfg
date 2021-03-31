@@ -14,14 +14,17 @@ class DePackMachine : Machine {
     override var levelCode: String = ""
     override var rawName: String = ""
 
-    var state: DePackMachineEnum = DePackMachineEnum.Need
+    var state: DePackMachineEnum = DePackMachineEnum.NEED
 
     enum class DePackMachineEnum constructor(val value: Int, val stateStr: String) {
-        Need(1, "待解包"), Start(2, "解包中"), END(0, "完成解包");
+        NEED(1, "待解包"),
+        START(2, "解包中"),
+        END(3, "完成解包"),
+        PASS(0, "审核通过");
 
         companion object {
             fun valueOf(value: Int): DePackMachineEnum {
-                return DePackMachineEnum.values().find { it.value == value }!!
+                return values().find { it.value == value }!!
             }
         }
     }

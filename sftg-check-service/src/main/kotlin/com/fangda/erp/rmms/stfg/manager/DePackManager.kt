@@ -68,7 +68,7 @@ class DePackManager @Autowired constructor(
     fun needDePack(rawMachineId: String, operator: String): Boolean {
         val dePackDataDO = DePackDataDO().apply {
             this.rawMachineId = rawMachineId
-            this.state = DePackMachine.DePackMachineEnum.Need.value
+            this.state = DePackMachine.DePackMachineEnum.NEED.value
             this.creator = operator
         }
         return assertPersistSuccess(dePackDao.insertDePackData(dePackDataDO) == 1) {
@@ -84,7 +84,7 @@ class DePackManager @Autowired constructor(
     fun startDePack(rawMachineId: String, operator: String): Boolean {
         val dePackDataDO = DePackDataDO().apply {
             this.rawMachineId = rawMachineId
-            this.state = DePackMachine.DePackMachineEnum.Start.value
+            this.state = DePackMachine.DePackMachineEnum.START.value
             this.startTime = TimeUtils.now()
             this.startOperator = operator
         }
@@ -130,6 +130,40 @@ class DePackManager @Autowired constructor(
             this.state = DePackMachine.DePackMachineEnum.END.value
             this.endTime = TimeUtils.now()
             this.checkOperator = operator
+        }
+        return assertPersistSuccess(dePackDao.updateDePackData(dePackDataDO) == 1) {
+            "更新数据失败!"
+        }
+    }
+
+    /**
+     * IO
+     * 修改解包数据
+     */
+    @Throws(PersistObjectException::class)
+    fun modifyDePackData(
+        rawMachineId: String,
+        details: List<DePackDataDetail>,
+        photos: List<File>,
+        operator: String
+    ): Boolean {
+        // 删除数据
+        this.dePackDao.deleteDePackDataDetail(rawMachineId)
+        this.dePackDao.deleteDePackPhoto(rawMachineId)
+        return this.endDePack(rawMachineId, details, photos, operator)
+    }
+
+    /**
+     * IO
+     * 车辆解包数据审核结束
+     */
+    @Throws(PersistObjectException::class)
+    fun passDePack(rawMachineId: String, operator: String): Boolean {
+        val dePackDataDO = DePackDataDO().apply {
+            this.rawMachineId = rawMachineId
+            this.state = DePackMachine.DePackMachineEnum.PASS.value
+            this.passTime = TimeUtils.now()
+            this.passOperator = operator
         }
         return assertPersistSuccess(dePackDao.updateDePackData(dePackDataDO) == 1) {
             "更新数据失败!"

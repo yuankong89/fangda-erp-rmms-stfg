@@ -34,6 +34,7 @@
             LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON DP.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
             LEFT JOIN VI_ENTER_RAW_INFO A ON DP.RAW_MACHINE_ID = A.RAW_MACHINE_ID
         <where>
+            A.RAW_MACHINE_ID IS NOT NULL
             <if test="stateIn != null &amp;&amp; stateIn.size > 0">
                 AND DP.STATE IN
                 <foreach collection="stateIn" item="item" index="index" open="(" separator="," close=")">
@@ -90,6 +91,10 @@
                     CHECK_OPER = #{checkOperator},
                     END_TIME = #{endTime}
                 </if>
+                <if test="passOperator != null">
+                    PASS_OPER = #{passOperator},
+                    PASS_TIME = #{passTime}
+                </if>
         WHERE RAW_MACHINE_ID = #{rawMachineId}
     </update>
 
@@ -120,4 +125,12 @@
             #{type}
         )
     </insert>
+
+    <delete id="deleteDePackDataDetail">
+        DELETE FROM TB_LOGISTICS_STFG_DEPACK_CK_D T WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </delete>
+
+    <delete id="deleteDePackPhoto">
+        DELETE FROM TB_LOGISTICS_INPUT_CHECK_PHOTO T WHERE T.RAW_MACHINE_ID = #{rawMachineId} AND T.CHECK_TYPE = 3
+    </delete>
 </mapper>

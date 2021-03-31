@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ 方大特钢科技股份有限公司
+  ~ all rights reserved
+  -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fangda.erp.rmms.stfg.db.dao.RefundDao">
+
+    <resultMap id="RefundMachineMap" type="com.fangda.erp.rmms.stfg.db.dataobject.refund.RefundMachineDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="LISCENCE_NUM" property="liscenceNo"/>
+        <result column="FLOW_NO" property="flowNo"/>
+        <result column="REFUND_OPER" property="refundOper"/>
+        <result column="CREATE_TIME" property="refundDate"/>
+        <result column="REASON" property="refundReason"/>
+    </resultMap>
+
+    <resultMap id="RefundCheckPhotoMap" type="com.fangda.erp.rmms.stfg.db.dataobject.refund.RefundCheckPhotoDO">
+        <id column="RAW_MACHINE_ID" property="rawMachineId"/>
+        <result column="NO" property="no"/>
+        <result column="PHOTO" property="photo"/>
+    </resultMap>
+
+    <select id="listRefundMachines" resultMap="RefundMachineMap">
+        SELECT
+            REC.RAW_MACHINE_ID,
+            A.LISCENCE_NUM,
+            FLOW.FLOW_NO,
+            REC.REFUND_OPER,
+            REC.CREATE_TIME,
+            REC.REASON
+        FROM TB_LOGISTICS_STFG_REFUND_R REC
+        LEFT JOIN TB_LOGISTICS_STFG_FLOW_NO FLOW ON REC.RAW_MACHINE_ID = FLOW.RAW_MACHINE_ID
+        LEFT JOIN VI_ENTER_RAW_INFO A ON REC.RAW_MACHINE_ID = A.RAW_MACHINE_ID
+        WHERE REC.STATE = 1
+    </select>
+
+    <select id="getRefundCheckPhoto" resultMap="RefundCheckPhotoMap">
+        SELECT
+            T.RAW_MACHINE_ID,
+            T.NO,
+            T.PHOTO
+        FROM TB_LOGISTICS_STFG_REFUND_PHOTO T
+        WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+        AND T.NO = #{photoNo}
+    </select>
+
+    <update id="updateRefundRecord">
+        UPDATE TB_LOGISTICS_STFG_REFUND_R
+        SET STATE = #{state},
+            CHECK_OPER = #{operator},
+            CHECK_TIME = sysdate,
+            CHECK_REMARK = #{checkReason}
+        WHERE RAW_MACHINE_ID = #{rawMachineId}
+    </update>
+
+    <insert id="insertRefundCheckPhotos" parameterType="com.fangda.erp.rmms.stfg.db.dataobject.refund.RefundCheckPhotoDO">
+        INSERT INTO TB_LOGISTICS_STFG_REFUND_PHOTO(
+            RAW_MACHINE_ID,
+            NO,
+            PHOTO
+        ) VALUES (
+            #{rawMachineId},
+            #{no},
+            #{photo}
+        )
+    </insert>
+
+    <update id="updateMachinePlanState">
+        UPDATE TB_LOGISTICS_MACHINE_PLAN T
+            SET T.STATE = #{state}
+        WHERE T.RAW_MACHINE_ID = #{rawMachineId}
+    </update>
+
+</mapper>

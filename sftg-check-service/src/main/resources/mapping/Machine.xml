@@ -175,7 +175,7 @@
         ORDER BY WN.GROSS_WEIGHT_TIME DESC
     </select>
 
-    <select id="selectMaxFlowNo" resultType="String">
+    <select id="getMaxFlowNo" resultType="String">
         SELECT MAX(T.FLOW_NO)
         FROM TB_LOGISTICS_STFG_FLOW_NO T
         WHERE T.FLOW_NO LIKE CONCAT(#{prefix}, '%')

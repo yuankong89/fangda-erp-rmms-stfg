@@ -36,6 +36,6 @@ interface MachineDao {
     ): List<MidAcceptedMachine>
 
     // 流水号生成
-    fun selectMaxFlowNo(prefix: String): String
+    fun getMaxFlowNo(prefix: String): String
     fun insertMachineFlowNo(rawMachineId: String, newFlowNo: String): Int
 }
